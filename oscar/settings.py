@@ -60,6 +60,7 @@ INSTALLED_APPS = (
     'users',
     'resources',
     'end_test_poll',
+    'forum'
 
 ) + ADDITIONAL_APPS
 
