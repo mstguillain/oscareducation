@@ -40,7 +40,7 @@ class StudentCollaborator(models.Model):
 class HelpRequest(models.Model):
     timestamp = models.DateTimeField(default=datetime.now)
     """ L'état actuel de la requête """
-    state = models.CharField(max_length=20,null=False,blank=False, choices=(
+    state = models.CharField(max_length=20, null=False, blank=False, choices=(
         ("Closed", "Cloturé"),
         ("Open", "Ouverte"),
         ("Pending", "En cours"),
