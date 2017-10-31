@@ -40,14 +40,22 @@ class StudentCollaborator(models.Model):
     def replied_help_request_list(self):
         return HelpRequest.objects.filter(tutor=self.user)
 
+    def change_settings(self, new_settings):
+        self.settings = new_settings
+        self.save()
+
 
 class HelpRequest(models.Model):
     """ Constantes : status des demandes """
     CLOSED = "Closed"
     OPEN = "Open"
     PENDING = "Pending"
-
+    """ date et heure de création """
     timestamp = models.DateTimeField(default=datetime.now)
+
+    """ Les settings pour cette demande """
+    settings = models.ForeignKey(CollaborativeSettings)
+
     """ L'état actuel de la requête """
     requestStatus =  (
         (CLOSED, u"Cloturé"),
@@ -88,14 +96,18 @@ class HelpRequest(models.Model):
         self.state = HelpRequest.PENDING
         self.save()
 
-    def close_request(self, comment, closeCategory):
+    def close_request(self, comment, close_category):
         self.state = HelpRequest.CLOSED
         """ Si on a fourni un commentaire """
         if comment is not None:
             self.comment = comment
         """ Si on a fourni une autre category que celle par défaut """
-        if closeCategory is not None:
-            self.closedReason = closeCategory
+        if close_category is not None:
+            self.closedReason = close_category
+        self.save()
+
+    def change_settings(self, new_settings):
+        self.settings = new_settings
         self.save()
 
 
