@@ -4,6 +4,8 @@ from __future__ import unicode_literals
 from django.db import models
 from django.contrib.auth.models import User
 from skills.models import SkillHistory,Skill
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 from datetime import datetime
 
 
@@ -14,7 +16,7 @@ class StudentCollaborator(models.Model):
     #  https://docs.djangoproject.com/en/dev/topics/auth/customizing/#extending-the-existing-user-model
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     """" code postal : pour l'instant que integer"""
-    code_postal = models.IntegerField()
+    code_postal = models.IntegerField(null=True, blank=False)
     """" flag pour dire si l'user a activé le système pour lui """
     collaborative_tool = models.BooleanField(default=False)
     """ Les settings par défaut pour ce user """
@@ -43,6 +45,18 @@ class StudentCollaborator(models.Model):
     def change_settings(self, new_settings):
         self.settings = new_settings
         self.save()
+
+    """ https://simpleisbetterthancomplex.com/tutorial/2016/07/22/how-to-extend-django-user-model.html#onetoone """
+    """ Signaux: faire en sorte qu'un objet StudentCollaborator existe si on a un modele """
+    @receiver(post_save, sender=User)
+    def create_student_collaborator_profile(sender, instance, created, **kwargs):
+        if created:
+            """ On crée effectivement notre profile """
+            StudentCollaborator.objects.create(
+                user=instance,
+                collaborative_tool=False,
+                settings=CollaborativeSettings.objects.create()  # Initialisé avec les settings par défaut
+            )
 
 
 class HelpRequest(models.Model):
