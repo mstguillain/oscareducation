@@ -62,11 +62,17 @@
             %li
               %a.icon.logout{href: "{% url 'logout' %}"}
                 -#%img{src: "{% static 'img/icons/logout.png' %}"}
+            %li
+              %a.icon.settings{href: "{% url 'settings' %}"}
+                -#%img{src: "{%static 'img/icons/settings.png' %}"}
           #toCollapse.collapse.navbar-collapse
             %ul.nav.navbar-nav.hidden-md.hidden-lg
               %li
                 %a.icon.logout{href: "{% url 'logout' %}"}
                   -# %img{src: "{% static 'img/icons/logout.png' %}"}
+              %li
+                %a.icon.settings{href: "{% url 'settings' %} "}
+                  -#%img{src: "{%static 'img/icons/settings.png' %}"}
 
     -block breadcrumb
 

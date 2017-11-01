@@ -789,6 +789,12 @@ ol.breadcrumb a {
     background-size: 24px 24px;
 }
 
+.icon.settings {
+    background-image : url(/static/img/icons/settings.png);
+    padding-top: 22px;
+    background-size: 24px 24px;
+}
+
 .icon.new-class {
     background-image: url(/static/img/icons/add-class.png);
 }

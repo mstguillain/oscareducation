@@ -22,3 +22,16 @@ def update_settings(request):
     return render(request, 'student_collaboration/student_settings.haml', {
         'student_form': student_form
     })
+
+
+def settings(settings, next_page=None
+             #,
+           # template_name='registration/logged_out.html',
+           # redirect_field_name=REDIRECT_FIELD_NAME,
+           # current_app=None, extra_context=None
+             ):
+    """ Exemple de page HTML, non valide pour que l'exemple soit concis """
+
+    text = """<h1>Ce bouton fonctionne !</h1>"""
+
+    return HttpResponse(text)
