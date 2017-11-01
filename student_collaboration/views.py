@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 from django.contrib.auth.decorators import login_required
-from django.forms import inlineformset_factory
 from django.shortcuts import render, get_object_or_404
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 
 from student_collaboration.models import StudentCollaborator, CollaborativeSettings
 from .forms import StudentCollaboratorForm, CollaborativeSettingsForm
@@ -26,6 +25,7 @@ def update_settings(request):
             student_form.settings = settings
             settings.save()
             student.save()
+            return HttpResponseRedirect('/student_collaboration/settings/')
 
     # else:
     settings_form = CollaborativeSettingsForm(instance=settings)
@@ -34,3 +34,7 @@ def update_settings(request):
         'student_form': student_form,
         'settings_form': settings_form
     })
+
+
+def collaborative_home(request):
+    return render(request, 'student_collaboration/student_collaboration_home.haml')

@@ -796,6 +796,12 @@ ol.breadcrumb a {
     background-size: 24px 24px;
 }
 
+.global-shortcut.collab {
+    background-image : url(/static/img/icons/collaborative.png);
+    padding-top: 22px;
+    background-size: 24px 24px;
+}
+
 .icon.new-class {
     background-image: url(/static/img/icons/add-class.png);
 }
