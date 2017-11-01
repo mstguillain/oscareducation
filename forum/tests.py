@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
 from django.test import TestCase, Client
 
 from promotions.models import Lesson, Stage
@@ -10,7 +11,25 @@ from .models import Thread, Message
 
 
 class ThreadModelTest(TestCase):
-    def testCreateThread(self):
+
+    def test_invalid_thread_both_recipient_professor(self):
+        user = User(username="sender")
+        user.save()
+
+        recipient = User(username="recipient")
+        recipient.save()
+
+        professor_user = User(username="professor")
+        professor_user.save()
+        professor = Professor(user=professor_user)
+        professor.save()
+
+        thread = Thread(title="Help", author=user, recipient=recipient, professor=professor)
+
+        with self.assertRaises(ValidationError):
+            thread.clean()
+
+    def test_create_thread(self):
         user = User()
         user.save()
         thread = Thread(title="Help on Calculus", author=user)
@@ -23,7 +42,7 @@ class ThreadModelTest(TestCase):
 
         self.assertEquals(thread.title, "Help")
 
-    def testPrivate(self):
+    def test_private_thread(self):
         user = User(username="sender")
         user.save()
 
@@ -38,7 +57,7 @@ class ThreadModelTest(TestCase):
         self.assertFalse(thread.is_public_lesson())
         self.assertFalse(thread.is_public_professor())
 
-    def testPublicProfessor(self):
+    def test_public_professor_thread(self):
         user = User(username="sender")
         user.save()
 
@@ -55,7 +74,7 @@ class ThreadModelTest(TestCase):
         self.assertFalse(thread.is_private())
         self.assertFalse(thread.is_public_lesson())
 
-    def testPublicLesson(self):
+    def test_public_lesson_thread(self):
         user = User(username="sender")
         user.save()
 
@@ -69,21 +88,22 @@ class ThreadModelTest(TestCase):
         thread.clean()
         thread.save()
 
+
         self.assertTrue(thread.is_public_lesson())
         self.assertFalse(thread.is_private())
         self.assertFalse(thread.is_public_professor())
 
-    def testMessages(self):
+    def test_messages(self):
         user = User()
         user.save()
 
         thread = Thread(title="test", author=user)
         thread.save()
 
-        first_message = Message(thread=thread, content="hello")
+        first_message = Message(author=user, thread=thread, content="hello")
         first_message.save()
 
-        second_message = Message(thread=thread, content="hello as well")
+        second_message = Message(author=user, thread=thread, content="hello as well")
         second_message.save()
 
         messages = thread.messages()
@@ -91,69 +111,29 @@ class ThreadModelTest(TestCase):
         self.assertEquals(messages[0].id, first_message.id)
         self.assertEquals(messages[1].id, second_message.id)
 
-    def testReplies(self):
+    def test_replies(self):
         user = User()
         user.save()
 
         thread = Thread(title="test", author=user)
         thread.save()
 
-        first_message = Message(thread=thread, content="hello")
+        first_message = Message(author=user, thread=thread, content="hello")
         first_message.save()
 
-        second_message = Message(thread=thread, content="hello as well", parent_message=first_message)
+        second_message = Message(author=user, thread=thread, content="hello as well", parent_message=first_message)
         second_message.save()
 
         messages = thread.messages()
 
-        self.assertEquals(messages[0].id, first_message.id)
-        self.assertEquals(messages[1].id, second_message.id)
+        self.assertEquals(messages[0], first_message)
 
         replies = first_message.replies()
         self.assertEquals(replies[0], second_message)
 
-        all_replies = first_message.all_replies()
-        self.assertEquals(all_replies[first_message], [{second_message: []}])
-
-    def testAllReplies(self):
-        user = User()
-        user.save()
-
-        thread = Thread(title="test", author=user)
-        thread.save()
-
-        first_message = Message(thread=thread, content="hello")
-        first_message.save()
-
-        second_message = Message(thread=thread, content="hello as well", parent_message=first_message)
-        second_message.save()
-
-        third_message = Message(thread=thread, content="test", parent_message=first_message)
-        third_message.save()
-
-        fourth_message = Message(thread=thread, content="test", parent_message=second_message)
-        fourth_message.save()
-
-        fifth_message = Message(thread=thread, content="test", parent_message=fourth_message)
-        fifth_message.save()
-
-        all_replies = first_message.all_replies()
-        self.assertEquals(all_replies, {
-            first_message: [
-                {
-                    second_message: [
-                        {
-                            fourth_message: [
-                                {fifth_message: []}
-                            ]
-                        }
-                    ]
-                },
-                {
-                    third_message: []
-                }
-            ]
-        })
+        replies_with_self = first_message.replies(include_self=True)
+        self.assertEquals(replies_with_self[0], first_message)
+        self.assertEquals(replies_with_self[1], second_message)
 
 
 class TestGetDashboard(TestCase):
@@ -165,11 +145,29 @@ class TestGetDashboard(TestCase):
 
 
 class TestGetThread(TestCase):
+    def test_get_thread_page_404(self):
+        c = Client()
+
+        # Unknown ID
+        response = c.get('/forum/thread/150')
+        self.assertEquals(response.status_code, 404)
+
     def test_get_thread_page(self):
         c = Client()
-        # TODO: temporary id for temporary test
-        response = c.get('/forum/thread/1')
+        user = User()
+        user.save()
+
+        thread = Thread(title="test", author=user)
+        thread.save()
+
+        first_message = Message(author=user, thread=thread, content="hello")
+        first_message.save()
+        response = c.get('/forum/thread/' + str(thread.id))
+        context = response.context
+        self.assertEquals(context["thread"], thread)
+        self.assertEquals(context["messages"][0], thread.messages()[0])
         self.assertEquals(response.status_code, 200)
+
 
 class TestPostReply(TestCase):
     def test_get_thread_page(self):
