@@ -792,6 +792,7 @@ ol.breadcrumb a {
 .icon.settings {
     background-image : url(/static/img/icons/settings.png);
     padding-top: 22px;
+    padding-right: 40px;
     background-size: 24px 24px;
 }
 

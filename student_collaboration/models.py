@@ -27,7 +27,7 @@ class StudentCollaborator(models.Model):
     """" flag pour dire si l'user a activé le système pour lui """
     collaborative_tool = models.BooleanField(default=False)
     """ Les settings par défaut pour ce user """
-    settings = models.ForeignKey(CollaborativeSettings)
+    settings = models.OneToOneField(CollaborativeSettings, on_delete=models.CASCADE)
     """" skills déjà acquises par l'user"""
     def get_mastered_skills(self):
         return SkillHistory.objects.filter(student=self.user, value="acquired").values('skill__name', 'skill__code')
