@@ -78,7 +78,7 @@ class HelpRequest(models.Model):
     settings = models.ForeignKey(CollaborativeSettings)
 
     """ L'état actuel de la requête """
-    requestStatus =  (
+    requestStatus = (
         (CLOSED, u"Cloturé"),
         (OPEN, "Ouverte"),
         (PENDING, "En cours"),
@@ -130,4 +130,20 @@ class HelpRequest(models.Model):
     def change_settings(self, new_settings):
         self.settings = new_settings
         self.save()
+
+    """ Signal : Quand compétence maitrisé, on ferme auto la help request """
+    @receiver(post_save, sender=SkillHistory)
+    def check_status(sender, instance, **kwargs):
+        if instance.value == 'acquired':
+            """ On récupère les help request qui doivent être fermé """
+            helprequest_to_be_closed = HelpRequest.objects.filter(
+                student=instance.student,
+                skill=instance.skill,
+            ).exclude(
+                state=HelpRequest.CLOSED
+            )
+            """ Si trouvé, on les ferme """
+            if not helprequest_to_be_closed:
+                for closed in helprequest_to_be_closed.all():
+                    closed.close_request()
 
