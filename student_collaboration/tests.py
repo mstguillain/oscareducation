@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 from django.test import TestCase
 from .models import CollaborativeSettings, StudentCollaborator, HelpRequest
 from users.models import Student
-from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.auth.models import User
 from skills.models import SkillHistory, Skill
 
@@ -14,10 +13,17 @@ class CollaborativeSettingsTestCase(TestCase):
     def setUp(self):
         self.settings1 = CollaborativeSettings.objects.create()  # un settings par défaut
         self.settings2 = CollaborativeSettings.objects.create(distance=10)  # un settings random
+        """ Le student qui va demander de l'aide  """
         self.newuser = User.objects.create(username="jy95")
         self.student = Student.objects.create(user=self.newuser)
-        """ Le StudentCollaborator associé devrait être crée """
         self.founduser = StudentCollaborator.objects.get(user=self.newuser)
+        """ Des compétences """
+        self.skill_1 = Skill.objects.create(code="B0124", name="Maths", description="Les MATHS")
+        self.skill_2 = Skill.objects.create(code="B0125", name="Logique", description="La Logique")
+        """ Le tutor qui va répondre """
+        self.newuser2 = User.objects.create(username="OscarLeGrandFrere")
+        self.student2 = Student.objects.create(user=self.newuser2)
+        self.founduser2 = StudentCollaborator.objects.get(user=self.newuser2)
 
     def testDistance(self):
         self.assertEqual(self.settings1.distance, CollaborativeSettings.DEFAULT_DISTANCE)
@@ -35,22 +41,49 @@ class CollaborativeSettingsTestCase(TestCase):
         self.assertEqual(self.founduser.settings.distance, 15)
 
     def testSkills(self):
-        self.skill_1 = Skill.objects.create(code="B0124", name="Maths", description="Les MATHS")
-        self.skill_2 = Skill.objects.create(code="B0125", name="Logique", description="La Logique")
         # reason_object1 = GenericForeignKey
         """ L'étudiant est bon en maths """
-        SkillHistory.objects.create(
-            skill=self.skill_1,
-            student=self.founduser.user.student,
-            value="acquired",
-            by_who=self.founduser.user,
-            reason="ACQUIS"
-        )
+        #SkillHistory.objects.create(
+        #    skill=self.skill_1,
+        #    student=self.founduser.user.student,
+        #    value="acquired",
+        #    by_who=self.founduser.user,
+        #    reason="ACQUIS"
+        #)
         """ mais mauvais en logique """
-        SkillHistory.objects.create(
-            skill=self.skill_2,
-            student=self.founduser.user.student,
-            value="not acquired",
-            by_who=self.founduser.user,
-            reason="NULL"
-        )
+        # SkillHistory.objects.create(
+        #     skill=self.skill_2,
+        #     student=self.founduser.user.student,
+        #     value="not acquired",
+        #     by_who=self.founduser.user,
+        #     reason="NULL"
+        # )
+
+    def testCreateHelpRequest(self):
+        self.founduser.launch_help_request(self.skill_2, self.founduser.settings)
+        help_request = HelpRequest.objects.get(student=self.founduser.user, skill=self.skill_2)
+        self.assertEqual(help_request.student, self.founduser.user)
+        self.assertEqual(help_request.skill, self.skill_2)
+        self.assertIsNone(help_request.tutor)
+        self.assertEqual(help_request.state, HelpRequest.OPEN)
+        self.assertEqual(help_request.settings, self.founduser.settings)
+
+    def testStateForHelpRequest(self):
+        """ On crée la fausse request """
+        self.founduser.launch_help_request(self.skill_2, self.founduser.settings)
+        """ On récupère celui qui vient d'être crée """
+        help_request = HelpRequest.objects.get(student=self.founduser.user, skill=self.skill_2)
+        """ Oscar le grand frère est passé """
+        help_request.reply_to_unanswered_help_request(self.founduser2.user)
+        help_request = HelpRequest.objects.get(student=self.founduser.user, skill=self.skill_2)
+        self.assertEqual(help_request.student, self.founduser.user)
+        self.assertEqual(help_request.skill, self.skill_2)
+        self.assertEqual(help_request.tutor, self.founduser2.user)
+        self.assertEqual(help_request.state, HelpRequest.PENDING)
+        """ On cloture la help request """
+        comment = u"J'ai fourni des explications que je juge suffisante"
+        help_request.close_request(comment, HelpRequest.TRIED_TO_HELP)
+        help_request = HelpRequest.objects.get(student=self.founduser.user, skill=self.skill_2)
+        self.assertEqual(help_request.state, HelpRequest.CLOSED)
+        self.assertEqual(help_request.closedReason, HelpRequest.TRIED_TO_HELP)
+        self.assertEqual(help_request.comment, comment)
