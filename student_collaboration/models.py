@@ -10,7 +10,13 @@ from datetime import datetime
 
 
 # Create your models here.
-# L'extension de l'user ; à compléter
+
+class CollaborativeSettings(models.Model):
+    """ Constante : La distance par défaut """
+    DEFAULT_DISTANCE = 5
+    """ Integer pour simplifier les calculs """
+    distance = models.IntegerField(default=DEFAULT_DISTANCE)
+
 class StudentCollaborator(models.Model):
     # manière simple d'extend l'object user :
     #  https://docs.djangoproject.com/en/dev/topics/auth/customizing/#extending-the-existing-user-model
@@ -80,7 +86,7 @@ class HelpRequest(models.Model):
     """ La compétence qui est l'objet de l'aide """
     skill = models.ForeignKey(Skill)
     """ L'étudiant qui aide ; pas présent au début """
-    tutor = models.ForeignKey(User, null=True)
+    tutor = models.ForeignKey(User, null=True, related_name="%(class)s_tutor")
     """ L'étudiant qui a demandé de l'aide """
     student = models.ForeignKey(User)
 
@@ -124,9 +130,3 @@ class HelpRequest(models.Model):
         self.settings = new_settings
         self.save()
 
-
-class CollaborativeSettings(models.Model):
-    """ Constante : La distance par défaut """
-    DEFAULT_DISTANCE = 5
-    """ Integer pour simplifier les calculs """
-    distance = models.IntegerField(default=DEFAULT_DISTANCE)
