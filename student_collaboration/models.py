@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 
 from django.db import models
 from django.contrib.auth.models import User
-from skills.models import SkillHistory,Skill
+from skills.models import SkillHistory, Skill
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from datetime import datetime
@@ -16,6 +16,7 @@ class CollaborativeSettings(models.Model):
     DEFAULT_DISTANCE = 5
     """ Integer pour simplifier les calculs """
     distance = models.IntegerField(default=DEFAULT_DISTANCE)
+
 
 class StudentCollaborator(models.Model):
     # manière simple d'extend l'object user :
