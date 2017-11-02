@@ -22,10 +22,10 @@ class CollaborativeSettings(models.Model):
 
 class PostalCode(models.Model):
 
-    postal_code = models.PositiveIntegerField
+    postal_code = models.PositiveIntegerField(default=0)
 
-    longitude = models.FloatField
-    latitude = models.FloatField
+    longitude = models.FloatField(default=0)
+    latitude = models.FloatField(default=0)
 
 
 class StudentCollaborator(models.Model):
