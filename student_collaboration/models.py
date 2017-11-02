@@ -96,7 +96,7 @@ class HelpRequest(models.Model):
     """ Le commentaire laissé à la fin de l'aide """
     """ Par défaut , un message auto du système """
     DEFAULT_COMMENT = u"Fermé par le système"
-    comment = models.CharField(max_length=255, default=DEFAULT_COMMENT)
+    comment = models.CharField(max_length=255, null=True)
 
     """ les categories possibles d'une cloture; ici volontaire restreint pour update à l'avenir """
     CLOSED_BY_SYSTEM = "SYSTEM_CLOSED"
@@ -109,7 +109,7 @@ class HelpRequest(models.Model):
         (TRIED_TO_HELP, u"A aidé dans la mesure du possible")
     )
     """ La raison de la fin de la help request """
-    closedReason = models.CharField(max_length=255, null=False, choices=closedCategories, default=CLOSED_BY_SYSTEM)
+    closedReason = models.CharField(max_length=255, null=True, choices=closedCategories)
 
     """ Permet de répondre à une help request ouverte """
     def reply_to_unanswered_help_request(self, user):
@@ -124,9 +124,13 @@ class HelpRequest(models.Model):
         """ Si on a fourni un commentaire """
         if comment is not None:
             self.comment = comment
+        else:
+            self.comment = HelpRequest.DEFAULT_COMMENT
         """ Si on a fourni une autre category que celle par défaut """
         if close_category is not None:
             self.closedReason = close_category
+        else:
+            self.closedReason = HelpRequest.CLOSED_BY_SYSTEM
         self.save()
 
     def change_settings(self, new_settings):

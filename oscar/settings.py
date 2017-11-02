@@ -201,5 +201,6 @@ EMAIL_USE_TLS = True
 
 """ Cron tasks """
 CRONJOBS = [
-    ('*/5 * * * *', 'student_collaboration.cron.set_open_help_request_to_pending')
+    ('*/5 * * * *', 'student_collaboration.cron.set_open_help_request_to_pending'),
+    ('*/5 * * * *', 'student_collaboration.cron.close_pending_help_requests_automatically_when_expired'),
 ]
