@@ -15,7 +15,7 @@ from math import sin, cos, sqrt, atan2, radians
 @login_required
 def update_settings(request):
     # requête de type POST; on update
-    true_student = get_object_or_404(Student, pk=request.user.pk)
+    true_student = get_object_or_404(Student, user=request.user.pk)
     student = get_object_or_404(StudentCollaborator, pk=true_student.studentcollaborator.pk)
     settings = get_object_or_404(CollaborativeSettings, pk=true_student.studentcollaborator.settings.pk)
 
