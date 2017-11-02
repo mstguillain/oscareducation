@@ -46,14 +46,6 @@ class StudentCollaborator(models.Model):
     def get_unmastered_skills(self):
         return SkillHistory.objects.filter(student=self.user, value='not acquired').values_list('skill__id', flat=True)
 
-    """ Methode de creation utilise dans les tests """
-    def create_help_request(self, skill, settings):
-        hr = HelpRequest(student=self.user, settings=settings)
-        hr.save()
-        hr.skill.add(skill)
-        return hr
-
-    """ Méthode de creation depuis la view """
     def launch_help_request(self, settings):
         return HelpRequest.objects.create(
             student=self.user,
