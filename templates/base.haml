@@ -50,9 +50,8 @@
                 <span style="color: #F58025">O</span>scar
             -else
               %a.brand.navbar-brand{href: "{% url 'student_dashboard' %}"}
-              -if user.studentcollaborator.collaborative_tool
-                %a.global-shortcut.collab{href: "{% url 'collaborative_home' %}"}
-                  -#%img{src: "{% static 'img/icons/collaborative.png' %}"}
+              %a.brand.navbar-collab{href: "{% url 'collaborative_home' %}"}
+                -#%img{src: "{% static 'img/icons/collaborative.png' %}"}
             -if user.professor and not no_menu
               .nav-global-shortcuts
                 %a.global-shortcut.home{href: "{% url 'professor:dashboard' %}", data-toggle: "tooltip", data-placement: "bottom", title: "Page d´accueil"}
@@ -62,9 +61,6 @@
                 %a.global-shortcut{href: "{% url 'professor:main-education' %}", data-toggle: "tooltip", data-placement: "bottom", title: "Compétences et ressources"}
                   %img{src: "{% static 'img/icons/ressource-white.png' %}"}
           %ul.nav.navbar-nav.navbar-right.hidden-xs.hidden-sm
-            %li
-              %a.icon.settings{href: "{% url 'settings' %}"}
-                -#%img{src: "{%static 'img/icons/settings.png' %}"}
             %li
               %a.icon.logout{href: "{% url 'logout' %}"}
                 -#%img{src: "{% static 'img/icons/logout.png' %}"}

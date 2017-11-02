@@ -76,7 +76,7 @@ class HelpRequest(models.Model):
     timestamp = models.DateTimeField(default=datetime.now)
 
     """ Les settings pour cette demande """
-    settings = models.ForeignKey(CollaborativeSettings)
+    settings = models.OneToOneField(CollaborativeSettings)
 
     """ L'état actuel de la requête """
     requestStatus = (
