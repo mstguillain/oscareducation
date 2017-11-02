@@ -79,6 +79,10 @@ class CollaborativeSettingsTestCase(TestCase):
         self.assertEqual(help_request.student, self.founduser.user)
         self.assertEqual(help_request.skill, self.skill_2)
         self.assertEqual(help_request.tutor, self.founduser2.user)
+        self.assertEqual(help_request.state, HelpRequest.ACCEPTED)
+        """ On change l'état ; par exemple timer expiré """
+        help_request.change_state(HelpRequest.PENDING)
+        help_request = HelpRequest.objects.get(student=self.founduser.user, skill=self.skill_2)
         self.assertEqual(help_request.state, HelpRequest.PENDING)
         """ On cloture la help request """
         comment = u"J'ai fourni des explications que je juge suffisante"

@@ -70,7 +70,8 @@ class HelpRequest(models.Model):
     """ Constantes : status des demandes """
     CLOSED = "Closed"
     OPEN = "Open"
-    PENDING = "Pending"
+    ACCEPTED = u"Accepted"
+    PENDING = u"Pending"
     """ date et heure de création """
     timestamp = models.DateTimeField(default=datetime.now)
 
@@ -81,7 +82,8 @@ class HelpRequest(models.Model):
     requestStatus = (
         (CLOSED, u"Cloturé"),
         (OPEN, "Ouverte"),
-        (PENDING, "En cours"),
+        (ACCEPTED, u"Accepté"),
+        (PENDING, "Timer expired"),
     )
     state = models.CharField(max_length=20, null=False, choices=requestStatus, default=OPEN)
     """ La compétence qui est l'objet de l'aide """
@@ -114,7 +116,7 @@ class HelpRequest(models.Model):
         """ L'étudiant qui répond est le tuteur """
         self.tutor = user
         """ On passe l'état à En cours """
-        self.state = HelpRequest.PENDING
+        self.state = HelpRequest.ACCEPTED
         self.save()
 
     def close_request(self, comment, close_category):
@@ -131,13 +133,17 @@ class HelpRequest(models.Model):
         self.settings = new_settings
         self.save()
 
+    def change_state(self, new_state):
+        self.state = new_state
+        self.save()
+
     """ Signal : Quand compétence maitrisé, on ferme auto la help request """
     @receiver(post_save, sender=SkillHistory)
     def check_status(sender, instance, **kwargs):
         if instance.value == 'acquired':
             """ On récupère les help request qui doivent être fermé """
             helprequest_to_be_closed = HelpRequest.objects.filter(
-                student=instance.student,
+                student=instance.student.user,
                 skill=instance.skill,
             ).exclude(
                 state=HelpRequest.CLOSED
