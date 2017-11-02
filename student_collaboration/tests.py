@@ -60,7 +60,7 @@ class CollaborativeSettingsTestCase(TestCase):
 
     def testCreateHelpRequest(self):
         skill_2 = Skill.objects.create(code="B0125", name="Logique", description="La Logique")
-        self.founduser.launch_help_request(skill_2, self.founduser.settings)
+        self.founduser.create_help_request(skill_2, self.founduser.settings)
         help_request = HelpRequest.objects.get(student=self.founduser.user, skill=skill_2)
         self.assertEqual(help_request.student, self.founduser.user)
         self.assertTrue(help_request.skill.filter(pk=skill_2.pk).exists())
@@ -71,7 +71,7 @@ class CollaborativeSettingsTestCase(TestCase):
     def testStateForHelpRequest(self):
         skill_2 = Skill.objects.create(code="B0125", name="Logique", description="La Logique")
         """ On crée la fausse request """
-        self.founduser.launch_help_request(skill_2, self.founduser.settings)
+        self.founduser.create_help_request(skill_2, self.founduser.settings)
         """ On récupère celui qui vient d'être crée """
         help_request = HelpRequest.objects.get(student=self.founduser.user, skill=skill_2)
         """ Oscar le grand frère est passé """
