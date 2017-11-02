@@ -2,8 +2,8 @@
 
 -block content
 
-  %h1 Request Help
-  %h1 Provide Help
-  -#%h1 Help Request History
-  %a.icon.settings{href: "{% url 'settings' %}"}
-                -#%img{src: "{%static 'img/icons/settings.png' %}"}
+  - if user.studentcollaborator.collaborative_tool
+    %a{href: "{% url 'request_help' %}"} Request Help
+    %a{href: "{% url 'provide_help' %}"} Provide Help
+    -#%a{href: "{% url 'help_request_history' %}"} Help Request History
+  %a{href: "{% url 'settings' %}"} Settings

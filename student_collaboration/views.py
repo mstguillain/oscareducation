@@ -2,7 +2,7 @@
 from __future__ import unicode_literals
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponseRedirect
 
 from student_collaboration.models import StudentCollaborator, CollaborativeSettings
 from .forms import StudentCollaboratorForm, CollaborativeSettingsForm
@@ -35,6 +35,11 @@ def update_settings(request):
         'settings_form': settings_form
     })
 
+def submit_help_request(request):
+    return render(request, "student_collaboration/student_collaboration_home.haml")
+
+def open_help_request(request):
+    return render(request, "student_collaboration/student_collaboration_home.haml")
 
 def collaborative_home(request):
     return render(request, 'student_collaboration/student_collaboration_home.haml')
