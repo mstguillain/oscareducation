@@ -2,7 +2,7 @@
 from __future__ import unicode_literals
 
 from django.test import TestCase
-from .models import CollaborativeSettings, StudentCollaborator, HelpRequest
+from .models import CollaborativeSettings, StudentCollaborator, HelpRequest, PostalCode
 from users.models import Student
 from django.contrib.auth.models import User
 from skills.models import SkillHistory, Skill
@@ -19,7 +19,6 @@ class CollaborativeSettingsTestCase(TestCase):
         self.founduser = StudentCollaborator.objects.get(user=self.student)
         """ Des compétences """
         self.skill_1 = Skill.objects.create(code="B0124", name="Maths", description="Les MATHS")
-        self.skill_2 = Skill.objects.create(code="B0125", name="Logique", description="La Logique")
         """ Le tutor qui va répondre """
         self.newuser2 = User.objects.create(username="OscarLeGrandFrere")
         self.student2 = Student.objects.create(user=self.newuser2)
@@ -60,34 +59,35 @@ class CollaborativeSettingsTestCase(TestCase):
         # )
 
     def testCreateHelpRequest(self):
-        self.founduser.launch_help_request(self.skill_2, self.founduser.settings)
-        help_request = HelpRequest.objects.get(student=self.founduser.user, skill=self.skill_2)
+        skill_2 = Skill.objects.create(code="B0125", name="Logique", description="La Logique")
+        self.founduser.launch_help_request(skill_2, self.founduser.settings)
+        help_request = HelpRequest.objects.get(student=self.founduser.user, skill=skill_2)
         self.assertEqual(help_request.student, self.founduser.user)
-        self.assertEqual(help_request.skill, self.skill_2)
+        self.assertTrue(help_request.skill.filter(pk=skill_2.pk).exists())
         self.assertIsNone(help_request.tutor)
         self.assertEqual(help_request.state, HelpRequest.OPEN)
         self.assertEqual(help_request.settings, self.founduser.settings)
 
     def testStateForHelpRequest(self):
+        skill_2 = Skill.objects.create(code="B0125", name="Logique", description="La Logique")
         """ On crée la fausse request """
-        self.founduser.launch_help_request(self.skill_2, self.founduser.settings)
+        self.founduser.launch_help_request(skill_2, self.founduser.settings)
         """ On récupère celui qui vient d'être crée """
-        help_request = HelpRequest.objects.get(student=self.founduser.user, skill=self.skill_2)
+        help_request = HelpRequest.objects.get(student=self.founduser.user, skill=skill_2)
         """ Oscar le grand frère est passé """
         help_request.reply_to_unanswered_help_request(self.founduser2.user)
-        help_request = HelpRequest.objects.get(student=self.founduser.user, skill=self.skill_2)
+        help_request = HelpRequest.objects.get(student=self.founduser.user, skill=skill_2)
         self.assertEqual(help_request.student, self.founduser.user)
-        self.assertEqual(help_request.skill, self.skill_2)
-        self.assertEqual(help_request.tutor, self.founduser2.user)
+        self.assertTrue(help_request.skill.filter(pk=skill_2.pk).exists())
         self.assertEqual(help_request.state, HelpRequest.ACCEPTED)
         """ On change l'état ; par exemple timer expiré """
         help_request.change_state(HelpRequest.PENDING)
-        help_request = HelpRequest.objects.get(student=self.founduser.user, skill=self.skill_2)
+        help_request = HelpRequest.objects.get(student=self.founduser.user, skill=skill_2)
         self.assertEqual(help_request.state, HelpRequest.PENDING)
         """ On cloture la help request """
         comment = u"J'ai fourni des explications que je juge suffisante"
         help_request.close_request(comment, HelpRequest.TRIED_TO_HELP)
-        help_request = HelpRequest.objects.get(student=self.founduser.user, skill=self.skill_2)
+        help_request = HelpRequest.objects.get(student=self.founduser.user, skill=skill_2)
         self.assertEqual(help_request.state, HelpRequest.CLOSED)
         self.assertEqual(help_request.closedReason, HelpRequest.TRIED_TO_HELP)
         self.assertEqual(help_request.comment, comment)
