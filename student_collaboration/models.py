@@ -2,7 +2,7 @@
 from __future__ import unicode_literals
 
 from django.db import models
-from django.contrib.auth.models import User
+from users.models import Student
 from skills.models import SkillHistory, Skill
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -21,7 +21,7 @@ class CollaborativeSettings(models.Model):
 class StudentCollaborator(models.Model):
     # manière simple d'extend l'object user :
     #  https://docs.djangoproject.com/en/dev/topics/auth/customizing/#extending-the-existing-user-model
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(Student, on_delete=models.CASCADE)
     """" code postal : pour l'instant que integer"""
     code_postal = models.IntegerField(null=True, blank=False)
     """" flag pour dire si l'user a activé le système pour lui """
@@ -55,7 +55,7 @@ class StudentCollaborator(models.Model):
 
     """ https://simpleisbetterthancomplex.com/tutorial/2016/07/22/how-to-extend-django-user-model.html#onetoone """
     """ Signaux: faire en sorte qu'un objet StudentCollaborator existe si on a un modele """
-    @receiver(post_save, sender=User)
+    @receiver(post_save, sender=Student)
     def create_student_collaborator_profile(sender, instance, created, **kwargs):
         if created:
             """ On crée effectivement notre profile """
@@ -89,9 +89,9 @@ class HelpRequest(models.Model):
     """ La compétence qui est l'objet de l'aide """
     skill = models.ForeignKey(Skill)
     """ L'étudiant qui aide ; pas présent au début """
-    tutor = models.ForeignKey(User, null=True, related_name="%(class)s_tutor")
+    tutor = models.ForeignKey(Student, null=True, related_name="%(class)s_tutor")
     """ L'étudiant qui a demandé de l'aide """
-    student = models.ForeignKey(User)
+    student = models.ForeignKey(Student)
 
     """ Le commentaire laissé à la fin de l'aide """
     """ Par défaut , un message auto du système """
@@ -147,7 +147,7 @@ class HelpRequest(models.Model):
         if instance.value == 'acquired':
             """ On récupère les help request qui doivent être fermé """
             helprequest_to_be_closed = HelpRequest.objects.filter(
-                student=instance.student.user,
+                student=instance.student,
                 skill=instance.skill,
             ).exclude(
                 state=HelpRequest.CLOSED

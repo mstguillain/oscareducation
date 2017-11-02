@@ -1,9 +1,9 @@
-from django.contrib.auth.models import User
+from users.models import Student
 from student_collaboration.models import StudentCollaborator,CollaborativeSettings
 
 
 def run():
-    users = User.objects.all()
+    users = Student.objects.all()
     for user in users:
         collaborator = StudentCollaborator.objects.filter(user=user)
         if collaborator.count() < 1:
