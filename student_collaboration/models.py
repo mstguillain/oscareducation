@@ -22,7 +22,7 @@ class CollaborativeSettings(models.Model):
 
 class PostalCode(models.Model):
 
-    code_postal = models.PositiveIntegerField
+    postal_code = models.PositiveIntegerField
 
     longitude = models.FloatField
     latitude = models.FloatField
@@ -44,12 +44,11 @@ class StudentCollaborator(models.Model):
 
     """ skills non acquises mais déjà testés """
     def get_unmastered_skills(self):
-        return SkillHistory.objects.filter(student=self.user, value='not acquired').values('skill__name', 'skill__code')
+        return SkillHistory.objects.filter(student=self.user, value='not acquired').values_list('skill__id', flat=True)
 
-    def launch_help_request(self, skill_requested, settings):
-        HelpRequest.objects.create(
+    def launch_help_request(self, settings):
+        return HelpRequest.objects.create(
             student=self.user,
-            skill=skill_requested,
             settings=settings
         )
 
@@ -86,7 +85,7 @@ class HelpRequest(models.Model):
     timestamp = models.DateTimeField(default=datetime.now)
 
     """ Les settings pour cette demande """
-    settings = models.OneToOneField(CollaborativeSettings)
+    settings = models.ForeignKey(CollaborativeSettings)
 
     """ L'état actuel de la requête """
     requestStatus = (

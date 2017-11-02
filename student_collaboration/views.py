@@ -6,7 +6,8 @@ from django.http import HttpResponseRedirect
 
 from student_collaboration.models import StudentCollaborator, CollaborativeSettings, HelpRequest
 from users.models import Student
-from .forms import StudentCollaboratorForm, CollaborativeSettingsForm
+from skills.models import Skill
+from .forms import StudentCollaboratorForm, CollaborativeSettingsForm, UnmasteredSkillsForm
 from math import sin, cos, sqrt, atan2, radians
 
 
@@ -38,8 +39,27 @@ def update_settings(request):
         'settings_form': settings_form
     })
 
+@login_required
 def submit_help_request(request):
-    return render(request, "student_collaboration/student_collaboration_home.haml")
+    student_collab = get_object_or_404(StudentCollaborator, pk=request.user.student.studentcollaborator.pk)
+    list_skills_id = student_collab.get_unmastered_skills()
+    list_skill_unmastered = Skill.objects.filter(id__in=list_skills_id)
+
+    if request.method == 'POST':
+        form = UnmasteredSkillsForm(list_skill_unmastered, request.POST)
+        if form.is_valid(): # All validation rules pass
+            form.liste = form.cleaned_data['liste']
+            settings = get_object_or_404(CollaborativeSettings, pk=request.user.student.studentcollaborator.settings.pk)
+            created_hr = student_collab.launch_help_request(settings)
+            for skill in form.cleaned_data.get("liste"):
+                created_hr.skill.add(skill)
+            return HttpResponseRedirect("/student_collaboration/")
+    else:
+        skill_form = UnmasteredSkillsForm(list_skill_unmastered)
+
+    return render(request, "student_collaboration/request_help.haml", {
+        'skill_form': skill_form
+    })
 
 @login_required
 def open_help_request(request):

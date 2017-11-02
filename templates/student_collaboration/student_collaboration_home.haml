@@ -2,7 +2,7 @@
 
 -block content
 
-  - if user.studentcollaborator.collaborative_tool
+  - if user.student.studentcollaborator.collaborative_tool
     %a{href: "{% url 'request_help' %}"} Request Help
     %a{href: "{% url 'provide_help' %}"} Provide Help
     -#%a{href: "{% url 'help_request_history' %}"} Help Request History
