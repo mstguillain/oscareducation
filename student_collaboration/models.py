@@ -5,8 +5,10 @@ from django.db import models
 from users.models import Student
 from skills.models import SkillHistory, Skill
 from django.db.models.signals import post_save
+from django.db.models import Q
 from django.dispatch import receiver
 from datetime import datetime
+
 
 
 # Create your models here.
@@ -18,12 +20,20 @@ class CollaborativeSettings(models.Model):
     distance = models.IntegerField(default=DEFAULT_DISTANCE)
 
 
+class PostalCode(models.Model):
+
+    code_postal = models.PositiveIntegerField
+
+    longitude = models.FloatField
+    latitude = models.FloatField
+
+
 class StudentCollaborator(models.Model):
     # manière simple d'extend l'object user :
     #  https://docs.djangoproject.com/en/dev/topics/auth/customizing/#extending-the-existing-user-model
     user = models.OneToOneField(Student, on_delete=models.CASCADE)
     """" code postal : pour l'instant que integer"""
-    code_postal = models.IntegerField(null=True, blank=False)
+    postal_code = models.OneToOneField(PostalCode,null=True)
     """" flag pour dire si l'user a activé le système pour lui """
     collaborative_tool = models.BooleanField(default=False)
     """ Les settings par défaut pour ce user """
@@ -87,7 +97,7 @@ class HelpRequest(models.Model):
     )
     state = models.CharField(max_length=20, null=False, choices=requestStatus, default=OPEN)
     """ La compétence qui est l'objet de l'aide """
-    skill = models.ForeignKey(Skill)
+    skill = models.ManyToManyField(Skill)
     """ L'étudiant qui aide ; pas présent au début """
     tutor = models.ForeignKey(Student, null=True, related_name="%(class)s_tutor")
     """ L'étudiant qui a demandé de l'aide """

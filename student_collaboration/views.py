@@ -4,16 +4,19 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponseRedirect
 
-from student_collaboration.models import StudentCollaborator, CollaborativeSettings
+from student_collaboration.models import StudentCollaborator, CollaborativeSettings, HelpRequest
+from users.models import Student
 from .forms import StudentCollaboratorForm, CollaborativeSettingsForm
+from math import sin, cos, sqrt, atan2, radians
 
 
 # Create your views here.
 @login_required
 def update_settings(request):
     # requête de type POST; on update
-    student = get_object_or_404(StudentCollaborator, pk=request.user.studentcollaborator.pk)
-    settings = get_object_or_404(CollaborativeSettings, pk=request.user.studentcollaborator.settings.pk)
+    true_student = get_object_or_404(Student, pk=request.user.pk)
+    student = get_object_or_404(StudentCollaborator, pk=true_student.studentcollaborator.pk)
+    settings = get_object_or_404(CollaborativeSettings, pk=true_student.studentcollaborator.settings.pk)
 
     if request.method == 'POST':
         settings_form = CollaborativeSettingsForm(request.POST, instance=settings)
@@ -38,8 +41,32 @@ def update_settings(request):
 def submit_help_request(request):
     return render(request, "student_collaboration/student_collaboration_home.haml")
 
+@login_required
 def open_help_request(request):
-    return render(request, "student_collaboration/student_collaboration_home.haml")
+    open_help_requests = HelpRequest.objects.filter(requestStatus=HelpRequest.OPEN)
+    filtered_help_requests = []
+    for help_request in open_help_requests:
+        """ Formule de Haversine pour connaitre la distance entre deux points géographiques """
+        earth_radius = 6373.0
+
+        lat1 = radians(help_request.student.studentcollaborator.postal_code.latitude)
+        lon1 = radians(help_request.student.studentcollaborator.postal_code.longitude)
+        lat2 = radians(request.user.postal_code.latitude)
+        lon2 = radians(request.user.postal_code.longitude)
+
+        dlon = lon2 - lon1
+        dlat = lat2 - lat1
+
+        a = sin(dlat / 2) ** 2 + cos(lat1) * cos(lat2) * sin(dlon / 2) ** 2
+        c = 2 * atan2(sqrt(a), sqrt(1 - a))
+
+        distance = earth_radius * c
+        if distance <= help_request.settings.distance:
+            filtered_help_requests.append(help_request)
+
+    return render(request, "student_collaboration/student_collaboration_home.haml", {
+        "open_help_requests" : filtered_help_requests
+    })
 
 def collaborative_home(request):
     return render(request, 'student_collaboration/student_collaboration_home.haml')
