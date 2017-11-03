@@ -9,5 +9,5 @@ urlpatterns = [
     url(r'^$', views.collaborative_home, name='collaborative_home'),
     url(r'^settings/$', views.update_settings, name='settings'),
     url(r'^request_help/$', views.submit_help_request, name='request_help'),
-    url(r'^$', views.open_help_request, name='provide_help')
+    url(r'^provide_help/$', views.open_help_request, name='provide_help')
 ]

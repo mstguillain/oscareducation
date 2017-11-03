@@ -3,11 +3,13 @@ from __future__ import unicode_literals
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponseRedirect
+from django.template import context
+from django.views.generic import ListView
 
 from student_collaboration.models import StudentCollaborator, CollaborativeSettings, HelpRequest
 from users.models import Student
 from skills.models import Skill
-from .forms import StudentCollaboratorForm, CollaborativeSettingsForm, UnmasteredSkillsForm
+from .forms import StudentCollaboratorForm, CollaborativeSettingsForm, UnmasteredSkillsForm, HelpRequestForm
 from math import sin, cos, sqrt, atan2, radians
 
 
@@ -43,11 +45,10 @@ def update_settings(request):
 def submit_help_request(request):
     student_collab = get_object_or_404(StudentCollaborator, pk=request.user.student.studentcollaborator.pk)
     list_skills_id = student_collab.get_unmastered_skills()
-    print(list_skills_id)
     if list_skills_id:
         list_skill_unmastered = Skill.objects.filter(id__in=list_skills_id)
     else:
-        list_skill_unmastered = list_skills_id
+        list_skill_unmastered = list_skills_id #student had no skill, no need to filter => empty query set
 
     if request.method == 'POST':
         form = UnmasteredSkillsForm(list_skill_unmastered, request.POST)
@@ -67,7 +68,7 @@ def submit_help_request(request):
 
 @login_required
 def open_help_request(request):
-    open_help_requests = HelpRequest.objects.filter(requestStatus=HelpRequest.OPEN)
+    open_help_requests = HelpRequest.objects.filter(state=HelpRequest.OPEN)
     filtered_help_requests = []
     for help_request in open_help_requests:
         """ Formule de Haversine pour connaitre la distance entre deux points géographiques """
@@ -75,8 +76,8 @@ def open_help_request(request):
 
         lat1 = radians(help_request.student.studentcollaborator.postal_code.latitude)
         lon1 = radians(help_request.student.studentcollaborator.postal_code.longitude)
-        lat2 = radians(request.user.postal_code.latitude)
-        lon2 = radians(request.user.postal_code.longitude)
+        lat2 = radians(request.user.student.studentcollaborator.postal_code.latitude)
+        lon2 = radians(request.user.student.studentcollaborator.postal_code.longitude)
 
         dlon = lon2 - lon1
         dlat = lat2 - lat1
@@ -88,9 +89,41 @@ def open_help_request(request):
         if distance <= help_request.settings.distance:
             filtered_help_requests.append(help_request)
 
-    return render(request, "student_collaboration/student_collaboration_home.haml", {
-        "open_help_requests" : filtered_help_requests
+    #helprequestform = HelpRequestForm(HelpRequests=filtered_help_requests)
+    date = []
+    student = []
+    skill = []
+    for i in filtered_help_requests:
+        date.append(i.timestamp)
+        student.append(i.student)
+        skill.append(i.skill)
+        # print (i.skill)
+    # print(filtered_help_requests)
+    # for i in filtered_help_requests:
+    #     print (i.timestamp)
+    #     print (i.skill)
+    #     print (i.student)
+    return render(request, "student_collaboration/open_help_requests_list.haml", {
+        "open_help_requests": filtered_help_requests
     })
 
+# class open_help_requestListView(ListView):
+#     temp = ""
+#
+#     def get(self, request, *args, **kwargs):
+#         context['temp'] = self.request.GET.get('temp')
+#         return context
 def collaborative_home(request):
     return render(request, 'student_collaboration/student_collaboration_home.haml')
+
+
+# class HelpdesListView(DetailView):
+#     model = HelpRequest
+#     template_name = "open.haml"
+#
+#     def get_context_data(self, **kwargs):
+#         # Call the base implementation first to get a context
+#         context = super(HelpdesListView, self).get_context_data(**kwargs)
+#         # Add in a QuerySet of all the books
+#         context['book_list'] = Book.objects.all()
+#         return context
