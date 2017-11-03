@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 
 from django import forms
 from django.contrib.auth.models import User
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponseRedirect, HttpResponse
 from django.views.decorators.http import require_POST, require_GET
 
@@ -16,6 +16,12 @@ class ThreadForm(forms.Form):
     title = forms.TextInput()
     content = forms.Textarea()
     visibility = forms.ChoiceField()
+
+class MessageReplyForm(forms.ModelForm):
+    class Meta:
+        model = Message
+        fields = ('content',)
+
 
 
 @require_GET
@@ -98,6 +104,14 @@ def reply_thread(request, id):
         parent_message = get_object_or_404(Message, pk=message_id)
         message.parent_message = parent_message
     """
+    message_id = request.GET.get('message_id')
+    thread = get_object_or_404(Thread, pk=id)
+    form = MessageReplyForm(request.POST) # request.Post contains the data we want
+    author = User.objects.get(pk=request.user.id)
+    if form.is_valid():
+        content = form.cleaned_data['content']
+        message = Message.objects.create(content=content, thread=thread, author=author)
+        message.save()
 
-    return HttpResponse()
+    return redirect(thread)
 
