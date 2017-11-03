@@ -18,6 +18,5 @@ class CollaborativeSettingsForm(forms.ModelForm):
 class UnmasteredSkillsForm(forms.Form):
     def __init__(self, qs=None, *args, **kwargs):
         super(UnmasteredSkillsForm, self).__init__(*args, **kwargs)
-        if qs:
-            self.fields['liste'] = forms.ModelMultipleChoiceField(queryset=qs)
+        self.fields['liste'] = forms.ModelMultipleChoiceField(queryset=qs)
 
