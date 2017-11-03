@@ -23,9 +23,14 @@ class CollaborativeSettings(models.Model):
 class PostalCode(models.Model):
 
     postal_code = models.PositiveIntegerField(default=0)
-
     longitude = models.FloatField(default=0)
     latitude = models.FloatField(default=0)
+
+    def __unicode__(self):
+        return str(self.postal_code)
+
+    class Meta:
+        ordering = ['postal_code']
 
 
 class StudentCollaborator(models.Model):
