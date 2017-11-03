@@ -9,9 +9,9 @@ from forum.views import forum_dashboard
 from promotions.models import Lesson, Stage
 from users.models import Professor, Student
 from .models import Thread, Message
+from .views import deepValidateAndFetch
 from dashboard import private_threads, public_class_threads, public_teacher_threads_student, get_thread_set
 from views import create_thread, reply_thread
-
 
 class ThreadModelTest(TestCase):
 
@@ -137,7 +137,6 @@ class ThreadModelTest(TestCase):
         replies_with_self = first_message.replies(include_self=True)
         self.assertEquals(replies_with_self[0], first_message)
         self.assertEquals(replies_with_self[1], second_message)
-
 
 class TestGetDashboard(TestCase):
     def setUp(self):
@@ -365,6 +364,5 @@ class TestPostThread(TestCase):
 class TestGetWritePage(TestCase):
     def test_get_write_page(self):
         c = Client()
-        # TODO: temporary id for temporary test
         response = c.get('/forum/write/')
         self.assertEquals(response.status_code, 200)

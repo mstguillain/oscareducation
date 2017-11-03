@@ -3,12 +3,18 @@ from __future__ import unicode_literals
 
 from django import forms
 from django.contrib.auth.models import User
+from django.db import transaction
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponseRedirect, HttpResponse
 from django.views.decorators.http import require_POST, require_GET
 
 # Create your views here.
 from forum.models import Thread, Message
+
+from promotions.models import Lesson
+from skills.models import Skill
+from users.models import Professor
+
 from dashboard import get_thread_set
 
 
@@ -21,6 +27,7 @@ class MessageReplyForm(forms.ModelForm):
     class Meta:
         model = Message
         fields = ('content',)
+
 
 
 
@@ -46,27 +53,119 @@ def create_thread(request):
 
 
 def get_create_thread_page(request):
-    return HttpResponse()
-
+    return render(request, "forum/new_thread.haml", { 'errors' : [], "data": {
+            'title' : "",
+            'visibility': "private",
+            'visibdata' : "",
+            'skills' : "",
+            'content' : ""
+        } })
 
 def post_create_thread(request):
-    """
-    form = ThreadForm(request.POST)
 
-    if form.is_valid():
-        title = form.cleaned_data['title']
-        skills = form.cleaned_data['skills']
-        content = form.cleaned_data['content']
+    errors = []
+    params = deepValidateAndFetch(request, errors)
+
+    if len(errors) == 0:
 
         with transaction.atomic():
-            thread = Thread(title=title, skills=skills)
-            # TODO: set visibility
-            thread.save()
-            original_message = Message(content=content, parent_thread=thread)
-            original_message.save()
-    """
 
-    return HttpResponse()
+            thread = Thread(title=params['title'], author=params['author'])
+
+            if params['visibility'] == 'private':
+                thread.recipient = params['recipient']
+
+            if params['visibility'] == 'class':
+                thread.lesson = params['lesson']
+
+            if params['visibility'] == 'public':
+                thread.professor = params['professor']
+
+            thread.save()
+            thread.skills = params['skills']
+            thread.save()
+
+            original_message = Message(content=params['content'], thread=thread, author=params['author'])
+            original_message.save()
+
+        return redirect('/forum/thread/' + str(thread.id))
+
+    else:
+        return render(request, "forum/new_thread.haml", { "errors" : errors, "data": params })
+
+class ThreadForm(forms.Form):
+    title = forms.CharField()
+    visibdata = forms.CharField()
+    skills = forms.CharField()
+    content = forms.CharField()
+
+def deepValidateAndFetch(request, errors):
+
+    params = {}
+    form = ThreadForm(request.POST)
+
+    form.is_valid()
+
+    params['visibility'] = request.POST.get('visibility')
+
+    try:
+        params['skills'] = form.cleaned_data['skills']
+    except:
+        params['skills'] = ""
+
+    try:
+        params['title'] = form.cleaned_data['title']
+    except:
+        params['title'] = ""
+        errors.append({ "field": "title", "msg" :"Le titre du sujet ne peut pas être vide"})
+
+    try:
+        params['visibdata'] = form.cleaned_data['visibdata']
+    except:
+        params['visibdata'] = ""
+        errors.append({ "field": "visibdata", "msg" :"Le paramètre de visibilité ne peut pas être vide"})
+
+    try:
+        params['content'] = form.cleaned_data['content']
+    except:
+        params['content'] = ""
+        errors.append({ "field": "content", "msg" :"Le premier message du sujet ne peut pas être vide"})
+
+    try:
+        params['author'] = User.objects.get(pk=request.user.id)
+    except:
+        errors.append({ "field": "visibdata", "msg" :"Auteur inconnu"})
+
+    if params['visibility'] not in ["private", "class", "public"]:
+        errors.append({ "field": "visibility", "msg" :"Type de visibilité invalide"})
+
+    if params['visibdata'] != "":
+
+        if params['visibility'] == "private":
+            try:
+                params['recipient'] = User.objects.get(pk=params['visibdata'])
+            except:
+                errors.append({ "field": "visibdata", "msg" :"Destinataire inconnu"})
+
+        if params['visibility'] == "class":
+            try:
+                params['lesson'] = Lesson.objects.get(pk=params['visibdata'])
+            except:
+                errors.append({ "field": "visibdata", "msg" :"Classe inconnue"})
+
+        if params['visibility'] == "public":
+            try:
+                params['professor'] =  Professor.objects.get(pk=params['visibdata'])
+            except:
+                errors.append({ "field": "visibdata", "msg" :"Professeur inconnu"})
+
+    if params['skills'] != "":
+        try:
+            params['skills'] = Skill.objects.filter(pk__in=params['skills'].encode('utf8').split(" "))
+        except:
+            errors.append({ "field": "skills", "msg" :"Compétence(s) inconnue(s) ou mal formée(s) (format: id1 id2 ...)"})
+
+    return params
 
 
 def thread(request, id):
@@ -114,4 +213,3 @@ def reply_thread(request, id):
         message.save()
 
     return redirect(thread)
-
