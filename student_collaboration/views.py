@@ -66,8 +66,13 @@ def submit_help_request(request):
         'skill_form': skill_form
     })
 
+
 @login_required
-def open_help_request(request):
+def open_help_request(request,id = None):
+    if id:
+        hp = HelpRequest.objects.filter(id=id).first()
+        hp.reply_to_unanswered_help_request(request.user.student)
+
     open_help_requests = HelpRequest.objects.filter(state=HelpRequest.OPEN)
     filtered_help_requests = []
     for help_request in open_help_requests:
@@ -117,13 +122,3 @@ def collaborative_home(request):
     return render(request, 'student_collaboration/student_collaboration_home.haml')
 
 
-# class HelpdesListView(DetailView):
-#     model = HelpRequest
-#     template_name = "open.haml"
-#
-#     def get_context_data(self, **kwargs):
-#         # Call the base implementation first to get a context
-#         context = super(HelpdesListView, self).get_context_data(**kwargs)
-#         # Add in a QuerySet of all the books
-#         context['book_list'] = Book.objects.all()
-#         return context

@@ -7,6 +7,7 @@
         <th>Name</th>
         <th>Skill</th>
         <th>Date</th>
+        <th></th>
       </tr>
     </thead>
     <tbody>
@@ -21,6 +22,7 @@
           </ul>
         </td>
         <td>{{ help_request.timestamp }} </td>
+        <td><a href= "{% url 'reply_help' help_request.id %}">"Accepter"</a> </td>
       </tr>
     {% endfor %}
     </tbody>
