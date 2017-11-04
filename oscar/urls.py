@@ -11,6 +11,7 @@ urlpatterns = [
     url(r'^professor/', include("promotions.urls", namespace="professor")),
     url(r'^student/', include("student.urls")),
     url(r'^stats/', include("stats.urls", namespace="stats")),
+    url(r'^student_collaboration/', include("student_collaboration.urls")),
     #url(r'^$', views.root_redirection, name="home"),
     url(r'^$', views.home, name="home"),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

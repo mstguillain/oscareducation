@@ -1,0 +1,9 @@
+-extends "base.haml"
+
+-block content
+
+  <form method="post">
+    {% csrf_token %}
+    {{ skill_form.as_p }}
+    <button type="submit">Send help request</button>
+  </form>

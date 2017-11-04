@@ -43,6 +43,7 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_crontab',
     'authentification',
     'bootstrap3',
     'django_extensions',
@@ -60,7 +61,7 @@ INSTALLED_APPS = (
     'users',
     'resources',
     'end_test_poll',
-
+    'student_collaboration'
 ) + ADDITIONAL_APPS
 
 MIDDLEWARE = (
@@ -197,3 +198,9 @@ EMAIL_HOST_USER ="euredukaoscar.noreply@gmail.com"
 EMAIL_HOST_PASSWORD ="7A=em=nBt@+r3MFq"
 
 EMAIL_USE_TLS = True
+
+""" Cron tasks """
+CRONJOBS = [
+    ('*/5 * * * *', 'student_collaboration.cron.set_open_help_request_to_pending'),
+    ('*/5 * * * *', 'student_collaboration.cron.close_pending_help_requests_automatically_when_expired'),
+]
