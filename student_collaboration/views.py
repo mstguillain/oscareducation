@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponseRedirect
-from django.template import context
 from django.views.generic import ListView
 
 from student_collaboration.models import StudentCollaborator, CollaborativeSettings, HelpRequest
@@ -68,57 +67,50 @@ def submit_help_request(request):
 
 
 @login_required
-def open_help_request(request,id = None):
+def open_help_request(request, id=None):
     if id:
         hp = HelpRequest.objects.filter(id=id).first()
         hp.reply_to_unanswered_help_request(request.user.student)
 
-    open_help_requests = HelpRequest.objects.filter(state=HelpRequest.OPEN)
-    filtered_help_requests = []
-    for help_request in open_help_requests:
-        """ Formule de Haversine pour connaitre la distance entre deux points géographiques """
-        earth_radius = 6373.0
+    """ On redirige vers la list view """
+    return redirect('provide_help')
 
-        lat1 = radians(help_request.student.studentcollaborator.postal_code.latitude)
-        lon1 = radians(help_request.student.studentcollaborator.postal_code.longitude)
-        lat2 = radians(request.user.student.studentcollaborator.postal_code.latitude)
-        lon2 = radians(request.user.student.studentcollaborator.postal_code.longitude)
 
-        dlon = lon2 - lon1
-        dlat = lat2 - lat1
-
-        a = sin(dlat / 2) ** 2 + cos(lat1) * cos(lat2) * sin(dlon / 2) ** 2
-        c = 2 * atan2(sqrt(a), sqrt(1 - a))
-
-        distance = earth_radius * c
-        if distance <= help_request.settings.distance:
-            filtered_help_requests.append(help_request)
-
-    #helprequestform = HelpRequestForm(HelpRequests=filtered_help_requests)
-    date = []
-    student = []
-    skill = []
-    for i in filtered_help_requests:
-        date.append(i.timestamp)
-        student.append(i.student)
-        skill.append(i.skill)
-        # print (i.skill)
-    # print(filtered_help_requests)
-    # for i in filtered_help_requests:
-    #     print (i.timestamp)
-    #     print (i.skill)
-    #     print (i.student)
-    return render(request, "student_collaboration/open_help_requests_list.haml", {
-        "open_help_requests": filtered_help_requests
-    })
-
-# class open_help_requestListView(ListView):
-#     temp = ""
-#
-#     def get(self, request, *args, **kwargs):
-#         context['temp'] = self.request.GET.get('temp')
-#         return context
 def collaborative_home(request):
     return render(request, 'student_collaboration/student_collaboration_home.haml')
 
+
+class OpenHelpRequestsListView(ListView):
+    model = HelpRequest
+    paginate_by = 10
+    template_name = "student_collaboration/open_help_requests_list.haml"
+    context_object_name = "open_help_requests"
+
+    def get_queryset(self):
+        open_help_requests = HelpRequest.objects.filter(state=HelpRequest.OPEN)
+        filtered_help_requests = []
+        # on ne prend que ceux dans notre area
+        for help_request in open_help_requests:
+            """ Formule de Haversine pour connaitre la distance entre deux points géographiques """
+            earth_radius = 6373.0
+
+            lat1 = radians(help_request.student.studentcollaborator.postal_code.latitude)
+            lon1 = radians(help_request.student.studentcollaborator.postal_code.longitude)
+            lat2 = radians(self.request.user.student.studentcollaborator.postal_code.latitude)
+            lon2 = radians(self.request.user.student.studentcollaborator.postal_code.longitude)
+
+            dlon = lon2 - lon1
+            dlat = lat2 - lat1
+
+            a = sin(dlat / 2) ** 2 + cos(lat1) * cos(lat2) * sin(dlon / 2) ** 2
+            c = 2 * atan2(sqrt(a), sqrt(1 - a))
+
+            distance = earth_radius * c
+            if distance <= help_request.settings.distance:
+                filtered_help_requests.append(help_request)
+
+        """ On peut toujours filtrer """
+        """ https://stackoverflow.com/a/33350839/6149867 """
+
+        return filtered_help_requests
 
