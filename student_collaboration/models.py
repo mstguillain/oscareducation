@@ -5,10 +5,8 @@ from django.db import models
 from users.models import Student
 from skills.models import SkillHistory, Skill
 from django.db.models.signals import post_save
-from django.db.models import Q
 from django.dispatch import receiver
 from datetime import datetime
-
 
 
 # Create your models here.
@@ -43,6 +41,11 @@ class StudentCollaborator(models.Model):
     collaborative_tool = models.BooleanField(default=False)
     """ Les settings par défaut pour ce user """
     settings = models.OneToOneField(CollaborativeSettings, on_delete=models.CASCADE)
+
+    """ Pour l'admin """
+    def __unicode__(self):
+        return self.user.__unicode__()
+
     """" skills déjà acquises par l'user"""
     def get_mastered_skills(self):
         return SkillHistory.objects.filter(student=self.user, value="acquired").values('skill__name', 'skill__code')

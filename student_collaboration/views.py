@@ -86,6 +86,11 @@ class OpenHelpRequestsListView(ListView):
     template_name = "student_collaboration/open_help_requests_list.haml"
     context_object_name = "open_help_requests"
 
+    def get_context_data(self, **kwargs):
+        context = super(OpenHelpRequestsListView, self).get_context_data(**kwargs)
+        context['currentUserPk'] = self.request.user.student.studentcollaborator.pk
+        return context
+
     def get_queryset(self):
         open_help_requests = HelpRequest.objects.filter(state=HelpRequest.OPEN)
         filtered_help_requests = []
