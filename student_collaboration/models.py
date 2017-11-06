@@ -48,7 +48,7 @@ class StudentCollaborator(models.Model):
 
     """" skills déjà acquises par l'user"""
     def get_mastered_skills(self):
-        return SkillHistory.objects.filter(student=self.user, value="acquired").values('skill__name', 'skill__code')
+        return SkillHistory.objects.filter(student=self.user, value="acquired").values_list('skill__id', flat=True)
 
     """ skills non acquises mais déjà testés """
     def get_unmastered_skills(self):

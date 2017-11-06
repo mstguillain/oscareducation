@@ -92,7 +92,12 @@ class OpenHelpRequestsListView(ListView):
         return context
 
     def get_queryset(self):
-        open_help_requests = HelpRequest.objects.filter(state=HelpRequest.OPEN)
+        """ On cherche les compétences maitrisées de l'aidant """
+        mastered_skill_list = self.request.user.student.studentcollaborator.get_mastered_skills()
+        open_help_requests = HelpRequest.objects.filter(
+            state=HelpRequest.OPEN,
+            skill__in=mastered_skill_list
+        )
         filtered_help_requests = []
         # on ne prend que ceux dans notre area
         for help_request in open_help_requests:
