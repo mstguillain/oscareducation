@@ -4,9 +4,17 @@
 -load student_tags
 -load compress
 
+
+
 -block head
 	-compress css
     %link{:rel => "stylesheet", :href => "{% static 'css/dashboard.css' %}" }
+
+
+-block breadcrumb
+	%ol.breadcrumb
+		%li.active
+			%a{href: "/forum"} Forum
 
 -block content
 	{% if user.id is not None %}
@@ -17,6 +25,7 @@
 		.container-fluid.boxclasseTitle
 			%input{:type => "search", :id => "search", :placeholder => "Chercher..."}
 			.center
+
 		    	%table.table.table-hover
 		    		%tr{:class => "forum"}
 		    			%th 
@@ -27,6 +36,7 @@
 		          			%center Compétence(s)
 		          		%th
 		          			%center Date
+
 
 		        	{% if threads %}
 		        		-for thread in threads
