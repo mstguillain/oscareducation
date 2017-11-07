@@ -18,9 +18,9 @@ def update_settings(request):
     # requête de type POST; on update
     true_student = get_object_or_404(Student, user=request.user.pk)
     student = get_object_or_404(StudentCollaborator, pk=true_student.studentcollaborator.pk)
-    settings = get_object_or_404(CollaborativeSettings, pk=true_student.studentcollaborator.settings.pk)
 
     if request.method == 'POST':
+        settings = get_object_or_404(CollaborativeSettings, pk=true_student.studentcollaborator.settings.pk)
         settings_form = CollaborativeSettingsForm(request.POST, instance=settings)
         student_form = StudentCollaboratorForm(request.POST, instance=student)
 
@@ -32,13 +32,26 @@ def update_settings(request):
             student.save()
             return HttpResponseRedirect('/student_collaboration/settings/')
 
-    # else:
-    settings_form = CollaborativeSettingsForm(instance=settings)
-    student_form = StudentCollaboratorForm(instance=student)
-    return render(request, 'student_collaboration/student_settings.haml', {
-        'student_form': student_form,
-        'settings_form': settings_form
-    })
+    else:
+        # l'user peut avoir ou n'a pas de settings
+        settings_pk = None
+        if true_student.studentcollaborator.settings:
+            settings_pk = true_student.studentcollaborator.settings.pk
+        settings, is_created = CollaborativeSettings.objects.get_or_create(
+            pk=settings_pk
+        )
+        # settings just created ; add them to user
+        if is_created:
+            student.settings = settings
+            student.save()
+
+        settings_form = CollaborativeSettingsForm(instance=settings)
+        student_form = StudentCollaboratorForm(instance=student)
+        return render(request, 'student_collaboration/student_settings.haml', {
+            'student_form': student_form,
+            'settings_form': settings_form
+        })
+
 
 @login_required
 def submit_help_request(request):

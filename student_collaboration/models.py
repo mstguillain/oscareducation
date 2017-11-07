@@ -36,11 +36,11 @@ class StudentCollaborator(models.Model):
     #  https://docs.djangoproject.com/en/dev/topics/auth/customizing/#extending-the-existing-user-model
     user = models.OneToOneField(Student, on_delete=models.CASCADE)
     """" code postal : pour l'instant que integer"""
-    postal_code = models.OneToOneField(PostalCode,null=True)
+    postal_code = models.OneToOneField(PostalCode, null=True)
     """" flag pour dire si l'user a activé le système pour lui """
     collaborative_tool = models.BooleanField(default=False)
     """ Les settings par défaut pour ce user """
-    settings = models.OneToOneField(CollaborativeSettings, on_delete=models.CASCADE)
+    settings = models.OneToOneField(CollaborativeSettings, on_delete=models.CASCADE, null=True)
 
     """ Pour l'admin """
     def __unicode__(self):
@@ -78,8 +78,7 @@ class StudentCollaborator(models.Model):
             """ On crée effectivement notre profile """
             StudentCollaborator.objects.create(
                 user=instance,
-                collaborative_tool=False,
-                settings=CollaborativeSettings.objects.create()  # Initialisé avec les settings par défaut
+                collaborative_tool=False
             )
 
 
