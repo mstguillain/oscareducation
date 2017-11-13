@@ -1,0 +1,10 @@
+-extends "base.haml"
+
+-block content
+
+  <form method="post">
+    {% csrf_token %}
+    {{ student_form.as_p }}
+    {{ settings_form.as_p }}
+    <button type="submit">Save changes</button>
+  </form>
