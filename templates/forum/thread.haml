@@ -1,0 +1,34 @@
+-extends "base.haml"
+-load static
+-load compress
+-load forum_tags
+
+-block head
+  -compress css
+    %link{rel: "stylesheet", href: "{% static 'css/thread.css' %}" }
+
+-block breadcrumb
+  %ol.breadcrumb
+    %li
+      %a{href: "/forum"} Forum
+    %li.active
+      %a{href: "/forum/thread/{{thread.id}}"} {{ thread.title }}
+
+
+-block content
+  .page-header
+    %h1= thread.title
+      - for skill in thread.skills.all
+        %small= skill.id
+
+  .messages
+    - for message in messages
+      {% message_partial message user reply_to 0 %}
+
+  .reply-block
+    %form{:action =>'' , :method => 'post'} {% csrf_token %}
+      %textarea.form-control#content{:name => 'content'}
+      .flex
+        .flex-spacer
+        %button.btn.btn-primary.btn-lg#btn{:type => "submit"} Reply
+
