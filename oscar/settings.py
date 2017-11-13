@@ -61,6 +61,8 @@ INSTALLED_APPS = (
     'users',
     'resources',
     'end_test_poll',
+    'student_collaboration',
+    'forum',
     'student_collaboration'
 ) + ADDITIONAL_APPS
 

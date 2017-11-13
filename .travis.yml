@@ -1,7 +1,26 @@
 language: python
 install:
   - pip install pyyaml
+  - pip install -r requirements-oscar2.txt
+  - pip install coveralls
 python:
   - "2.7"
+before_script:
+  - psql -c "CREATE DATABASE oscar;" -U postgres
+  - psql -c "CREATE USER oscar WITH PASSWORD 'oscar' CREATEDB;" -U postgres
+  - python manage.py makemigrations
+  - chmod +x makemigrations.sh
+  - ./makemigrations.sh
+  - python manage.py migrate
 script:
   - python validate_exercices.py
+  - python manage.py test
+  - coverage run --source=forum manage.py test forum
+after_success:
+  coveralls
+services:
+  - postgresql
+addons:
+  postgresql: "9.4"
+notifications:
+  email: false
