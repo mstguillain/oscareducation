@@ -10,4 +10,3 @@ python manage.py makemigrations student
 python manage.py makemigrations users
 python manage.py makemigrations student_collaboration
 python manage.py makemigrations forum
-python manage.py makemigrations student_collaboration
