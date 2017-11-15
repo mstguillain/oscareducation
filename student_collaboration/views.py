@@ -72,10 +72,12 @@ def update_settings(request):
 def submit_help_request(request):
     student_collab = get_object_or_404(StudentCollaborator, pk=request.user.student.studentcollaborator.pk)
     list_skills_id = student_collab.get_unmastered_skills()
+    has_a_skill = True
     if list_skills_id:
         list_skill_unmastered = Skill.objects.filter(id__in=list_skills_id)
     else:
         list_skill_unmastered = list_skills_id #student had no skill, no need to filter => empty query set
+        has_a_skill = False
 
     if request.method == 'POST':
         form = UnmasteredSkillsForm(list_skill_unmastered, request.POST)
@@ -90,7 +92,8 @@ def submit_help_request(request):
         skill_form = UnmasteredSkillsForm(list_skill_unmastered)
 
     return render(request, "student_collaboration/request_help.haml", {
-        'skill_form': skill_form
+        'skill_form': skill_form,
+        'has_a_skill': has_a_skill
     })
 
 
