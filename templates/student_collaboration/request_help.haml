@@ -2,8 +2,13 @@
 
 -block content-student
 
-  <form method="post">
-    {% csrf_token %}
-    {{ skill_form.as_p }}
-    <button type="submit">Send help request</button>
-  </form>
+  {% csrf_token %}
+  {% if skill_form.fields.liste|length == 0 %}
+    .well
+      Vous n'avez pour l'instant aucune compétence nécessitant de l'aide
+  {% else %}
+    <form method="post">
+      {{ skill_form.as_p }}
+      <button type="submit">Send help request</button>
+    </form>
+  {% endif %}

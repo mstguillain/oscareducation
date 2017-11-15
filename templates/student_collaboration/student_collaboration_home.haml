@@ -5,9 +5,7 @@
     .well
       L'outil de collaboration est actuellement désactivé.<br>
     %a.btn.btn-primary.btn-lg{href: "{% url 'settings' %}"} Configurer
+  - else
+    .well
+      Le module de collaboration est activé
 
-  - if user.student.studentcollaborator.collaborative_tool
-    %a{href: "{% url 'request_help' %}"} Request Help
-    %a{href: "{% url 'provide_help' %}"} Provide Help
-    %a{href: "{% url 'help_request_history' %}"} Help Request History
-  %a{href: "{% url 'settings' %}"} Settings

@@ -1,31 +1,37 @@
 -extends "student_collaboration/template.haml"
 
 -block content-student
-  %table
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Skill</th>
-        <th>Date</th>
-        <th></th>
-      </tr>
-    </thead>
-    <tbody>
-    {% for help_request in open_help_requests %}
-      <tr>
-        <td>{{ help_request.student }}</td>
-        <td>
-          <ul>
-          {% for skill in help_request.skill.all %}
-            <li>{{ skill }}</li>
-          {% endfor %}
-          </ul>
-        </td>
-        <td>{{ help_request.timestamp }} </td>
-        -if help_request.student.studentcollaborator.pk == currentUserPk
-          <td></td>
-        -else
-          <td><a href= "{% url 'reply_help' help_request.id %}">Accepter</a> </td>
-      </tr>
-    {% endfor %}
-    </tbody>
+
+  {% if open_help_requests|length > 0 %}
+    %table
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Skill</th>
+          <th>Date</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for help_request in open_help_requests %}
+        <tr>
+          <td>{{ help_request.student }}</td>
+          <td>
+            <ul>
+            {% for skill in help_request.skill.all %}
+              <li>{{ skill }}</li>
+            {% endfor %}
+            </ul>
+          </td>
+          <td>{{ help_request.timestamp }} </td>
+          -if help_request.student.studentcollaborator.pk == currentUserPk
+            <td></td>
+          -else
+            <td><a href= "{% url 'reply_help' help_request.id %}">Accepter</a> </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    {% else %}
+      .well
+        Vous ne pouvez aider personne pour le moment.
+    {% endif %}
