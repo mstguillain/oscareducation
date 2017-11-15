@@ -1,20 +1,35 @@
 -extends "base.haml"
 
 
--block content
 
+
+
+-block content
+  -# center the pills
+  :css
+    .center-pills {
+      display: flex;
+      justify-content: center;
+      background-color: rgba(255, 255, 255, 0.2);
+    }
 
   .page-header
     %h1 Student Collaboration - {{ user.username }}
 
   .container-fluid.boxclasseTitle
-    %ul.nav.nav-pills
-      -#%a.nav-link.active{:href => "#"} Active
-      %li.nav-item
+    -# TODO [Loan] Refactor avec un for, beaucoup de copier coller pour des comportements redondants
+    %ul.nav.nav-pills.center-pills
+      {% url 'collaborative_home' as url %}
+      %li.nav-item{class: "{% if request.path == url %}active{% endif %}"}
+        %a.nav-link{href: "{% url 'collaborative_home' %}"} Accueil
+      {% url 'settings' as url %}
+      %li.nav-item{class: "{% if request.path == url %}active{% endif %}"}
         %a.nav-link{href: "{% url 'settings' %}"} Settings
 
       - if user.student.studentcollaborator.collaborative_tool
-        %li.nav-item
+        {% url 'request_help' as url %}
+        %li.nav-item{class: "{% if request.path == url %}active{% endif %}"}
           %a.nav-link{href: "{% url 'request_help' %}"} Request Help
-        %li.nav-item
+        {% url 'provide_help' as url %}
+        %li.nav-item{class: "{% if request.path == url %}active{% endif %}"}
           %a.nav-link{href: "{% url 'provide_help' %}"} Provide Help
