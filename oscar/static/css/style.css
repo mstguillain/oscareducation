@@ -794,17 +794,12 @@ ol.breadcrumb a {
 }
 
 
-.navbar-collab {
-  float: left;
-  background-image : url(/static/img/icons/collaborative.png);
-  /*padding-top: 22px;*/
-  /*background-size: 24px 24px;*/
-  /*padding: 15px 15px;*/
-    padding-top: 22px;
-    padding-right: 40px;
-    background-size: 24px 24px;
-  line-height: 20px;
-  height: 50px;
+.icon.navbar-collab {
+    float: left;
+    padding-top: 40px;
+    paggind-left: 10px;
+    background-image : url(/static/img/icons/collaborative.png);
+    background-size: 35px 35px;
 }
 
 .btn-primary {

@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponseRedirect
+from django.utils.decorators import method_decorator
 from django.views.generic import ListView
 
 from student_collaboration.models import StudentCollaborator, CollaborativeSettings, HelpRequest
@@ -10,7 +11,7 @@ from users.models import Student
 from skills.models import Skill
 from .forms import StudentCollaboratorForm, CollaborativeSettingsForm, UnmasteredSkillsForm, HelpRequestForm
 from math import sin, cos, sqrt, atan2, radians
-
+from decorators import user_has_collaborative_tool_active
 
 # Create your views here.
 @login_required
@@ -54,6 +55,7 @@ def update_settings(request):
 
 
 @login_required
+@user_has_collaborative_tool_active
 def submit_help_request(request):
     student_collab = get_object_or_404(StudentCollaborator, pk=request.user.student.studentcollaborator.pk)
     list_skills_id = student_collab.get_unmastered_skills()
@@ -80,6 +82,7 @@ def submit_help_request(request):
 
 
 @login_required
+@user_has_collaborative_tool_active
 def open_help_request(request, id=None):
     if id:
         hp = HelpRequest.objects.filter(id=id).first()
@@ -89,15 +92,21 @@ def open_help_request(request, id=None):
     return redirect('provide_help')
 
 
+@login_required
 def collaborative_home(request):
     return render(request, 'student_collaboration/student_collaboration_home.haml')
 
 
+@method_decorator(login_required, name='dispatch')
+@method_decorator(user_has_collaborative_tool_active, name='dispatch')
 class OpenHelpRequestsListView(ListView):
     model = HelpRequest
     paginate_by = 10
     template_name = "student_collaboration/open_help_requests_list.haml"
     context_object_name = "open_help_requests"
+
+    def dispatch(self, *args, **kwargs):
+        return super(OpenHelpRequestsListView,self).dispatch(*args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super(OpenHelpRequestsListView, self).get_context_data(**kwargs)
