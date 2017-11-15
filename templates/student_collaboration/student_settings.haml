@@ -4,7 +4,8 @@
 
   <form method="post">
     {% csrf_token %}
-    {{ student_form.as_p }}
+    {{ student_form_collaborative_tool.as_p }}
+    {{ student_form_postal_code.as_p }}
     {{ settings_form.as_p }}
     <button type="submit">Save changes</button>
   </form>

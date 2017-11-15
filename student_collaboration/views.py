@@ -9,7 +9,7 @@ from django.views.generic import ListView
 from student_collaboration.models import StudentCollaborator, CollaborativeSettings, HelpRequest
 from users.models import Student
 from skills.models import Skill
-from .forms import StudentCollaboratorForm, CollaborativeSettingsForm, UnmasteredSkillsForm, HelpRequestForm
+from .forms import StudentCollaboratorFormCollaborativeTool, StudentCollaboratorFormPostalCode, CollaborativeSettingsForm, UnmasteredSkillsForm, HelpRequestForm
 from math import sin, cos, sqrt, atan2, radians
 from decorators import user_has_collaborative_tool_active
 
@@ -23,14 +23,24 @@ def update_settings(request):
     if request.method == 'POST':
         settings = get_object_or_404(CollaborativeSettings, pk=true_student.studentcollaborator.settings.pk)
         settings_form = CollaborativeSettingsForm(request.POST, instance=settings)
-        student_form = StudentCollaboratorForm(request.POST, instance=student)
+        student_form_collaborative_tool = StudentCollaboratorFormCollaborativeTool(request.POST, instance=student)
+        student_form_postal_code = StudentCollaboratorFormPostalCode(request.POST, instance=student)
 
-        if student_form.is_valid() and settings_form.is_valid():
+        if student_form_collaborative_tool.is_valid() and student_form_postal_code.is_valid() and settings_form.is_valid():
             settings = settings_form.save(commit=False)
-            student = student_form.save(commit=False)
-            student_form.settings = settings
-            settings.save()
+
+            student = student_form_collaborative_tool.save(commit=False)
             student.save()
+
+            student = student_form_postal_code.save(commit=False)
+            student.save()
+
+            student_form_collaborative_tool.settings = settings
+            settings.save()
+
+            student_form_postal_code.settings = settings
+            settings.save()
+
             return HttpResponseRedirect('/student_collaboration/settings/')
 
     else:
@@ -47,9 +57,11 @@ def update_settings(request):
             student.save()
 
         settings_form = CollaborativeSettingsForm(instance=settings)
-        student_form = StudentCollaboratorForm(instance=student)
+        student_form_collaborative_tool = StudentCollaboratorFormCollaborativeTool(instance=student)
+        student_form_postal_code = StudentCollaboratorFormPostalCode(instance=student)
         return render(request, 'student_collaboration/student_settings.haml', {
-            'student_form': student_form,
+            'student_form_collaborative_tool': student_form_collaborative_tool,
+            'student_form_postal_code': student_form_postal_code,
             'settings_form': settings_form
         })
 
