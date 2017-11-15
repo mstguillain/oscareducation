@@ -50,7 +50,7 @@
                 <span style="color: #F58025">O</span>scar
             -else
               %a.brand.navbar-brand{href: "{% url 'student_dashboard' %}"}
-              %a.brand.navbar-collab{href: "{% url 'collaborative_home' %}"}
+              %a.icon.navbar-collab{href: "{% url 'collaborative_home' %}", title: "Collaborative Tool"}
                 -#%img{src: "{% static 'img/icons/collaborative.png' %}"}
             -if user.professor and not no_menu
               .nav-global-shortcuts
@@ -66,9 +66,6 @@
                 -#%img{src: "{% static 'img/icons/logout.png' %}"}
           #toCollapse.collapse.navbar-collapse
             %ul.nav.navbar-nav.hidden-md.hidden-lg
-              %li
-                %a.icon.settings{href: "{% url 'settings' %} "}
-                  -#%img{src: "{%static 'img/icons/settings.png' %}"}
               %li
                 %a.icon.logout{href: "{% url 'logout' %}"}
                   -# %img{src: "{% static 'img/icons/logout.png' %}"}
