@@ -3,7 +3,7 @@
 -block content-student
 
   {% csrf_token %}
-  {% if skill_form.fields.liste|length == 0 %}
+  {% if not skill_form%}
     .well
       Vous n'avez pour l'instant aucune compétence nécessitant de l'aide
   {% else %}
