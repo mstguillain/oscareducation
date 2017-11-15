@@ -33,3 +33,6 @@
         {% url 'provide_help' as url %}
         %li.nav-item{class: "{% if request.path == url %}active{% endif %}"}
           %a.nav-link{href: "{% url 'provide_help' %}"} Provide Help
+        {% url 'help_request_history' as url %}
+        %li.nav-item{class: "{% if request.path == url %}active{% endif %}"}
+          %a.nav-link{href: "{% url 'help_request_history' %}"} Historique
