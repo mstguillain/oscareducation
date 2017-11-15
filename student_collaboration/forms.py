@@ -3,11 +3,15 @@ from django import forms
 from .models import StudentCollaborator, CollaborativeSettings, HelpRequest
 
 
-class StudentCollaboratorForm(forms.ModelForm):
+class StudentCollaboratorFormCollaborativeTool(forms.ModelForm):
     class Meta:
         model = StudentCollaborator
-        fields = ['postal_code', 'collaborative_tool']
+        fields = ['collaborative_tool']
 
+class StudentCollaboratorFormPostalCode(forms.ModelForm):
+    class Meta:
+        model = StudentCollaborator
+        fields = ['postal_code']
 
 class CollaborativeSettingsForm(forms.ModelForm):
     class Meta:

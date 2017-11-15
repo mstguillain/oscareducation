@@ -1,0 +1,20 @@
+-extends "base.haml"
+
+
+-block content
+
+
+  .page-header
+    %h1 Student Collaboration - {{ user.username }}
+
+  .container-fluid.boxclasseTitle
+    %ul.nav.nav-pills
+      -#%a.nav-link.active{:href => "#"} Active
+      %li.nav-item
+        %a.nav-link{href: "{% url 'settings' %}"} Settings
+
+      - if user.student.studentcollaborator.collaborative_tool
+        %li.nav-item
+          %a.nav-link{href: "{% url 'request_help' %}"} Request Help
+        %li.nav-item
+          %a.nav-link{href: "{% url 'provide_help' %}"} Provide Help

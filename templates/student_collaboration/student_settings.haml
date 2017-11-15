@@ -1,10 +1,19 @@
--extends "base.haml"
+-extends "student_collaboration/template.haml"
 
--block content
+-block content-student
 
   <form method="post">
     {% csrf_token %}
-    {{ student_form.as_p }}
-    {{ settings_form.as_p }}
-    <button type="submit">Save changes</button>
+    -# TODO [Loan]: mettre les informations nécessaire au bon moment et endroit
+    {% if student_form_collaborative_tool.collaborative_tool.value  %}
+      {{ student_form_collaborative_tool.as_p }}
+      {{ student_form_postal_code.as_p }}
+      {{ settings_form.as_p }}
+    {% else %}
+      {{ student_form_collaborative_tool.as_p }}
+      {{ student_form_postal_code.as_p }}
+      {{ settings_form.as_p }}
+    {% endif %}
+
+    <button type="submit">Mettre à jour</button>
   </form>

@@ -1,6 +1,10 @@
--extends "base.haml"
+-extends "student_collaboration/template.haml"
 
--block content
+-block content-student
+  - if not user.student.studentcollaborator.collaborative_tool
+    .well
+      L'outil de collaboration est actuellement désactivé.<br>
+    %a.btn.btn-primary.btn-lg{href: "{% url 'settings' %}"} Configurer
 
   - if user.student.studentcollaborator.collaborative_tool
     %a{href: "{% url 'request_help' %}"} Request Help
