@@ -796,10 +796,9 @@ ol.breadcrumb a {
 
 .icon.navbar-collab {
     float: left;
-    padding-top: 40px;
-    paggind-left: 10px;
+    padding-top: 5%;
+    paggind-left: 2%;
     background-image : url(/static/img/icons/collaborative.png);
-    background-size: 35px 35px;
 }
 
 .btn-primary {

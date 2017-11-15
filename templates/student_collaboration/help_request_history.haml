@@ -1,0 +1,42 @@
+-extends "base.haml"
+
+-block content
+  %table
+    <thead>
+      <tr>
+        <th>Skill</th>
+        <th>Date</th>
+        <th>Thread</th>
+        <th>Close </th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for help_request in open_help_requests %}
+      <tr>
+        <td>
+          <ul>
+          {% for skill in help_request.skill.all %}
+            <li>{{ skill }}</li>
+          {% endfor %}
+          </ul>
+        </td>
+        <td>{{ help_request.timestamp }}</td>
+        -if help_request.state  == "Accepted"
+            <td> oui </td>
+         -elif help_request.state == "Closed"
+            <td> Closed </td>
+          -else
+            <td> no thread </td>
+        <td>
+            <button type="button">
+            <a class = btn href= "{% url 'change_history' 'closed' help_request.id%}">Close</a>
+            </button>
+        </td>
+      </tr>
+    {% endfor %}
+
+    <button type="button> <a class = btn href= "{% url 'change_history' 'provide'}"> provided Help_requests </a>
+    </button>
+    <button type="button> <a class = btn href= "{% url 'change_history' 'request'}"> Requested Help_requests </a>
+    </button>
+    </tbody>

@@ -118,8 +118,10 @@ class HelpRequest(models.Model):
     CLOSED_BY_SYSTEM = "SYSTEM_CLOSED"
     CANNOT_HELP = "CANNOT_HELP"
     TRIED_TO_HELP = "TRIED_TO_HELP"
+    CLOSED_BY_USER = "USER_CLOSED"
 
     closedCategories = (
+        (CLOSED_BY_USER, u"Fermé par le demandeur d'aide"),
         (CLOSED_BY_SYSTEM, u"Cloturé par le système"),
         (CANNOT_HELP, u"Ne sait pas aider"),
         (TRIED_TO_HELP, u"A aidé dans la mesure du possible")
@@ -135,7 +137,7 @@ class HelpRequest(models.Model):
         self.state = HelpRequest.ACCEPTED
         self.save()
 
-    def close_request(self, comment, close_category):
+    def close_request(self, comment=None, close_category=None):
         self.state = HelpRequest.CLOSED
         """ Si on a fourni un commentaire """
         if comment is not None:

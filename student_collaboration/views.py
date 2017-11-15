@@ -34,6 +34,7 @@ def update_settings(request):
 
     else:
         # l'user peut avoir ou n'a pas de settings
+        #L'ANGLAIS OMGGGGGG
         settings_pk = None
         if true_student.studentcollaborator.settings:
             settings_pk = true_student.studentcollaborator.settings.pk
@@ -93,6 +94,35 @@ def collaborative_home(request):
     return render(request, 'student_collaboration/student_collaboration_home.haml')
 
 
+def help_request_hist(request, status=None, id=None):
+    if status == "provide":
+        print("hello")
+    if status == "closed":
+        if id:
+            hp = HelpRequest.objects.filter(id=id).first()
+            hp.close_request(None,None)
+    return redirect('help_request_history')
+
+
+class HelpRequestHistory(ListView):
+    model = HelpRequest
+    template_name = "student_collaboration/help_request_history.haml"
+    context_object_name = "open_help_requests"
+
+    def get_context_data(self, **kwargs):
+        context = super(HelpRequestHistory, self).get_context_data(**kwargs)
+        return context
+
+    def get_queryset(self):
+        """We recover help request from User"""
+        #if self.status == "provide":
+        #    open_help_requests = HelpRequest.objects.filter(tutor=self.request.user.student)
+        #else:
+        open_help_requests = HelpRequest.objects.filter(student=self.request.user.student)
+        print(HelpRequestHistory)
+        return open_help_requests
+
+
 class OpenHelpRequestsListView(ListView):
     model = HelpRequest
     paginate_by = 10
@@ -106,6 +136,7 @@ class OpenHelpRequestsListView(ListView):
 
     def get_queryset(self):
         """ On cherche les compétences maitrisées de l'aidant """
+        # et l'anglais????
         mastered_skill_list = self.request.user.student.studentcollaborator.get_mastered_skills()
         open_help_requests = HelpRequest.objects.filter(
             state=HelpRequest.OPEN,
@@ -136,4 +167,5 @@ class OpenHelpRequestsListView(ListView):
         """ https://stackoverflow.com/a/33350839/6149867 """
 
         return filtered_help_requests
+
 

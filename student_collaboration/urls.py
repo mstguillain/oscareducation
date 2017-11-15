@@ -11,4 +11,6 @@ urlpatterns = [
     url(r'^request_help/$', views.submit_help_request, name='request_help'),
     url(r'^provide_help/$', views.OpenHelpRequestsListView.as_view(), name='provide_help'),
     url('^provide_help/([0-9]+)$', views.open_help_request, name='reply_help'),
+    url(r'^help_request_history/$', views.HelpRequestHistory.as_view(), name = 'help_request_history'),
+    url(r'^help_request_history/(?P<status>[\w\-]+)/(?P<id>[0-9]+)$', views.help_request_hist,name = 'change_history')
 ]
