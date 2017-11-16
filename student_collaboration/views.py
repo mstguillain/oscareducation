@@ -5,6 +5,8 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponseRedirect
 from django.utils.decorators import method_decorator
 from django.views.generic import ListView
+from django.db.models import Q
+from django.urls import reverse
 
 from student_collaboration.models import StudentCollaborator, CollaborativeSettings, HelpRequest
 from users.models import Student
@@ -114,12 +116,10 @@ def collaborative_home(request):
 
 
 def help_request_hist(request, status=None, id=None):
-    if status == "provide":
-        print("hello")
-    if status == "closed":
-        if id:
-            hp = HelpRequest.objects.filter(id=id).first()
-            hp.close_request(None,None)
+    if id:
+        hp = HelpRequest.objects.filter(id=id).first()
+        hp.close_request(None,None)
+    #return redirect(reverse('help_request_history', kwargs={'requests': status}))
     return redirect('help_request_history')
 
 
@@ -130,15 +130,17 @@ class HelpRequestHistory(ListView):
 
     def get_context_data(self, **kwargs):
         context = super(HelpRequestHistory, self).get_context_data(**kwargs)
+        context['currentStatus'] = self.request.GET.get('requests', None)
         return context
 
     def get_queryset(self):
         """We recover help request from User"""
-        #if self.status == "provide":
-        #    open_help_requests = HelpRequest.objects.filter(tutor=self.request.user.student)
-        #else:
-        open_help_requests = HelpRequest.objects.filter(student=self.request.user.student)
-        print(HelpRequestHistory)
+        if self.request.GET.get('requests', None) == "provide":
+            open_help_requests = HelpRequest.objects.filter(tutor=self.request.user.student)
+        elif self.request.GET.get('requests', None) == "request":
+            open_help_requests = HelpRequest.objects.filter(student=self.request.user.student)
+        else:
+            open_help_requests = HelpRequest.objects.filter(Q(tutor=self.request.user.student) | Q(student=self.request.user.student))
         return open_help_requests
 
 

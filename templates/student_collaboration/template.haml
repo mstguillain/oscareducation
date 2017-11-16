@@ -16,6 +16,9 @@
   .container-fluid.boxclasseTitle
     -# TODO [Loan] Refactor avec un for, beaucoup de copier coller pour des comportements redondants
     %ul.nav.nav-pills.center-pills
+      {% url 'student_dashboard' as url %}
+      %li.nav-item{class: "{% if request.path == url %}active{% endif %}"}
+        %a.nav-link{href: "{% url 'student_dashboard' %}"} Retour
       {% url 'collaborative_home' as url %}
       %li.nav-item{class: "{% if request.path == url %}active{% endif %}"}
         %a.nav-link{href: "{% url 'collaborative_home' %}"} Accueil

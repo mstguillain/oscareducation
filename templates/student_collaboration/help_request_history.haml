@@ -25,10 +25,18 @@
           %td No thread
           %td
             %button{type:"button"}
-              %a{class : btn,  href : "{% url 'change_history' 'closed' help_request.id%}"} Close
+              %a{class : btn,  href : "{% url 'change_history' currentStatus help_request.id%}"} Close
     {% endfor %}
 
-    %button{type : "button"}
-      %a{class : "btn", href : "{% url 'change_history' 'provide'}"} provided Help_requests
-    %button{type : "button"}
-      %a{class : "btn", href : "{% url 'change_history' 'request'}"} Requested Help_requests
+    <th>
+      <form action="{% url 'help_request_history' %}" method="GET">
+      <label>Show :
+          <select name="requests" id="test">
+            <option value="all" selected =>all</option>
+            <option value="request">request</option>
+            <option value="provide">provide</option>s
+          </select>
+      </label>
+      <input type="submit" value="Filtrer">
+      </form>
+    </th>
