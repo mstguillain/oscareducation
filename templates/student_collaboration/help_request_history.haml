@@ -1,42 +1,34 @@
 -extends "student_collaboration/template.haml"
 
 -block content-student
-  %table
-    <thead>
-      <tr>
-        <th>Skill</th>
-        <th>Date</th>
-        <th>Thread</th>
-        <th>Close </th>
-      </tr>
-    </thead>
-    <tbody>
+  %table{class : "table"}
+    %thead
+      %tr
+        %th{Skill}
+        %th{Date}
+        %th{Thread}
+        %th{Close}
+    %tbody
     {% for help_request in open_help_requests %}
-      <tr>
-        <td>
-          <ul>
+      %tr
+        %td
+          %ul
           {% for skill in help_request.skill.all %}
-            <li>{{ skill }}</li>
+            %li {{ skill }}
           {% endfor %}
-          </ul>
-        </td>
-        <td>{{ help_request.timestamp }}</td>
+        %td {{ help_request.timestamp }}
         -if help_request.state  == "Accepted"
-            <td> oui </td>
-         -elif help_request.state == "Closed"
-            <td> Closed </td>
-          -else
-            <td> no thread </td>
-        <td>
-            <button type="button">
-            <a class = btn href= "{% url 'change_history' 'closed' help_request.id%}">Close</a>
-            </button>
-        </td>
-      </tr>
+          %td oui
+        -elif help_request.state == "Closed"
+          %td Closed
+        -else
+          %td No thread
+          %td
+            %button{type:"button"}
+              %a{class : btn,  href : "{% url 'change_history' 'closed' help_request.id%}"} Close
     {% endfor %}
 
-    <button type="button> <a class = btn href= "{% url 'change_history' 'provide'}"> provided Help_requests </a>
-    </button>
-    <button type="button> <a class = btn href= "{% url 'change_history' 'request'}"> Requested Help_requests </a>
-    </button>
-    </tbody>
+    %button{type : "button"}
+      %a{class : "btn", href : "{% url 'change_history' 'provide'}"} provided Help_requests
+    %button{type : "button"}
+      %a{class : "btn", href : "{% url 'change_history' 'request'}"} Requested Help_requests
