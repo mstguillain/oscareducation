@@ -8,10 +8,12 @@ class StudentCollaboratorFormCollaborativeTool(forms.ModelForm):
         model = StudentCollaborator
         fields = ['collaborative_tool']
 
+
 class StudentCollaboratorFormPostalCode(forms.ModelForm):
     class Meta:
         model = StudentCollaborator
         fields = ['postal_code']
+
 
 class CollaborativeSettingsForm(forms.ModelForm):
     class Meta:
@@ -24,10 +26,10 @@ class UnmasteredSkillsForm(forms.Form):
         super(UnmasteredSkillsForm, self).__init__(*args, **kwargs)
         self.fields['liste'] = forms.ModelMultipleChoiceField(queryset=qs)
 
-class HelpRequestForm(forms.Form):
-     def __init__(self, *args, **kwargs):
-         helprequest = kwargs.pop('HelpRequests')
-         super(HelpRequestForm, self).__init__(*args, **kwargs)
-         for q in helprequest:
-             self.fields['HelpRequests'] = forms.CharField(label=HelpRequest.skill)
 
+class HelpRequestForm(forms.Form):
+    def __init__(self, *args, **kwargs):
+        helprequest = kwargs.pop('HelpRequests')
+        super(HelpRequestForm, self).__init__(*args, **kwargs)
+        for q in helprequest:
+            self.fields['HelpRequests'] = forms.CharField(label=HelpRequest.skill)

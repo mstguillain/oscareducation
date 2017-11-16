@@ -11,14 +11,16 @@ from django.urls import reverse
 from student_collaboration.models import StudentCollaborator, CollaborativeSettings, HelpRequest
 from users.models import Student
 from skills.models import Skill
-from .forms import StudentCollaboratorFormCollaborativeTool, StudentCollaboratorFormPostalCode, CollaborativeSettingsForm, UnmasteredSkillsForm, HelpRequestForm
+from .forms import StudentCollaboratorFormCollaborativeTool, StudentCollaboratorFormPostalCode, \
+    CollaborativeSettingsForm, UnmasteredSkillsForm, HelpRequestForm
 from math import sin, cos, sqrt, atan2, radians
 from decorators import user_has_collaborative_tool_active
+
 
 # Create your views here.
 @login_required
 def update_settings(request):
-    # requête de type POST; on update
+    # POST request; we perform an update
     true_student = get_object_or_404(Student, user=request.user.pk)
     student = get_object_or_404(StudentCollaborator, pk=true_student.studentcollaborator.pk)
 
@@ -46,8 +48,7 @@ def update_settings(request):
             return HttpResponseRedirect('/student_collaboration/settings/')
 
     else:
-        # l'user peut avoir ou n'a pas de settings
-        #L'ANGLAIS OMGGGGGG
+        # The user has or doesn't have settings
         settings_pk = None
         if true_student.studentcollaborator.settings:
             settings_pk = true_student.studentcollaborator.settings.pk
@@ -78,16 +79,16 @@ def submit_help_request(request):
     if list_skills_id:
         list_skill_unmastered = Skill.objects.filter(id__in=list_skills_id)
     else:
-        list_skill_unmastered = list_skills_id #student had no skill, no need to filter => empty query set
+        list_skill_unmastered = list_skills_id  # student had no skill, no need to filter => empty query set
         has_a_skill = False
 
     if request.method == 'POST':
         form = UnmasteredSkillsForm(list_skill_unmastered, request.POST)
-        if form.is_valid(): # All validation rules pass
-            form.liste = form.cleaned_data['liste']
+        if form.is_valid():  # All validation rules pass
+            form.list = form.cleaned_data['list']
             settings = get_object_or_404(CollaborativeSettings, pk=request.user.student.studentcollaborator.settings.pk)
             created_hr = student_collab.launch_help_request(settings)
-            for skill in form.cleaned_data.get("liste"):
+            for skill in form.cleaned_data.get("list"):
                 created_hr.skill.add(skill)
             return HttpResponseRedirect("/student_collaboration/")
     else:
@@ -106,7 +107,7 @@ def open_help_request(request, id=None):
         hp = HelpRequest.objects.filter(id=id).first()
         hp.reply_to_unanswered_help_request(request.user.student)
 
-    """ On redirige vers la list view """
+    """ We redirect to the list view """
     return redirect('provide_help')
 
 
@@ -115,18 +116,25 @@ def collaborative_home(request):
     return render(request, 'student_collaboration/student_collaboration_home.haml')
 
 
+@login_required
+@user_has_collaborative_tool_active
 def help_request_hist(request, status=None, id=None):
     if id:
         hp = HelpRequest.objects.filter(id=id).first()
-        hp.close_request(None,None)
-    #return redirect(reverse('help_request_history', kwargs={'requests': status}))
+        hp.close_request(None, None)
+    # return redirect(reverse('help_request_history', kwargs={'requests': status}))
     return redirect('help_request_history')
 
 
+@method_decorator(login_required, name='dispatch')
+@method_decorator(user_has_collaborative_tool_active, name='dispatch')
 class HelpRequestHistory(ListView):
     model = HelpRequest
     template_name = "student_collaboration/help_request_history.haml"
     context_object_name = "open_help_requests"
+
+    def dispatch(self, *args, **kwargs):
+        return super(HelpRequestHistory, self).dispatch(*args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super(HelpRequestHistory, self).get_context_data(**kwargs)
@@ -140,7 +148,8 @@ class HelpRequestHistory(ListView):
         elif self.request.GET.get('requests', None) == "request":
             open_help_requests = HelpRequest.objects.filter(student=self.request.user.student)
         else:
-            open_help_requests = HelpRequest.objects.filter(Q(tutor=self.request.user.student) | Q(student=self.request.user.student))
+            open_help_requests = HelpRequest.objects.filter(
+                Q(tutor=self.request.user.student) | Q(student=self.request.user.student))
         return open_help_requests
 
 
@@ -153,7 +162,7 @@ class OpenHelpRequestsListView(ListView):
     context_object_name = "open_help_requests"
 
     def dispatch(self, *args, **kwargs):
-        return super(OpenHelpRequestsListView,self).dispatch(*args, **kwargs)
+        return super(OpenHelpRequestsListView, self).dispatch(*args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super(OpenHelpRequestsListView, self).get_context_data(**kwargs)
@@ -161,17 +170,16 @@ class OpenHelpRequestsListView(ListView):
         return context
 
     def get_queryset(self):
-        """ On cherche les compétences maitrisées de l'aidant """
-        # et l'anglais????
+        """ We fetch the skills mastered by the helper """
         mastered_skill_list = self.request.user.student.studentcollaborator.get_mastered_skills()
         open_help_requests = HelpRequest.objects.filter(
             state=HelpRequest.OPEN,
             skill__in=mastered_skill_list
         )
         filtered_help_requests = []
-        # on ne prend que ceux dans notre area
+        # We only take the requests in the user's area
         for help_request in open_help_requests:
-            """ Formule de Haversine pour connaitre la distance entre deux points géographiques """
+            """ Haversine's formula to compute the distance between two geographical points """
             earth_radius = 6373.0
 
             lat1 = radians(help_request.student.studentcollaborator.postal_code.latitude)
@@ -189,9 +197,7 @@ class OpenHelpRequestsListView(ListView):
             if distance <= help_request.settings.distance:
                 filtered_help_requests.append(help_request)
 
-        """ On peut toujours filtrer """
+        """ We could still filter """
         """ https://stackoverflow.com/a/33350839/6149867 """
 
         return filtered_help_requests
-
-
