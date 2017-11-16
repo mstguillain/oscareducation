@@ -2,7 +2,7 @@
 
 -block content-student
 
-  {% if not has_a_skill%}
+  {% if skill_form.liste|length <= 0%}
     .well
       Vous n'avez pour l'instant aucune compétence nécessitant de l'aide
   {% else %}
