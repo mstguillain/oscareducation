@@ -1,9 +1,5 @@
 -extends "base.haml"
 
-
-
-
-
 -block content
   -# center the pills
   :css
@@ -11,6 +7,7 @@
       display: flex;
       justify-content: center;
       background-color: rgba(255, 255, 255, 0.2);
+      padding: 5px;
     }
 
   .page-header
@@ -24,15 +21,15 @@
         %a.nav-link{href: "{% url 'collaborative_home' %}"} Accueil
       {% url 'settings' as url %}
       %li.nav-item{class: "{% if request.path == url %}active{% endif %}"}
-        %a.nav-link{href: "{% url 'settings' %}"} Settings
+        %a.nav-link{href: "{% url 'settings' %}"} Réglages
 
       - if user.student.studentcollaborator.collaborative_tool
         {% url 'request_help' as url %}
         %li.nav-item{class: "{% if request.path == url %}active{% endif %}"}
-          %a.nav-link{href: "{% url 'request_help' %}"} Request Help
+          %a.nav-link{href: "{% url 'request_help' %}"} Demander de l'aide
         {% url 'provide_help' as url %}
         %li.nav-item{class: "{% if request.path == url %}active{% endif %}"}
-          %a.nav-link{href: "{% url 'provide_help' %}"} Provide Help
+          %a.nav-link{href: "{% url 'provide_help' %}"} Fournir de l'aide
         {% url 'help_request_history' as url %}
         %li.nav-item{class: "{% if request.path == url %}active{% endif %}"}
           %a.nav-link{href: "{% url 'help_request_history' %}"} Historique

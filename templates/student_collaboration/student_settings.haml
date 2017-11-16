@@ -17,3 +17,11 @@
 
     <button type="submit"> Mettre à jour</button>
   </form>
+
+  :javascript
+    $(document).ready( function() {
+      {% if student_form_collaborative_tool.collaborative_tool.value  %}
+        alert("I am an alert box!");
+      {% endif %}
+
+    } );
