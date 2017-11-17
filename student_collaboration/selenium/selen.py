@@ -11,6 +11,15 @@ def init_driver():
     driver.wait = WebDriverWait(driver, 1)
     return driver
 
+def addValByName(val, name, submit=False):
+    try:
+        box = driver.wait.until(EC.presence_of_element_located((By.NAME, name)))
+        box.send_keys(val)
+        if submit:
+            box.submit()
+    except Exception as ex:
+        print(ex)
+
 def loginAdmin(driver, username, password):
     driver.get('http://localhost:8000/admin/login/?next=/admin/')
     try:
@@ -28,23 +37,27 @@ def logoutAdmin(driver):
     driver.get('http://localhost:8000/admin/logout')
     driver.get('http://localhost:8000')
 
-def login(username, password):
+def login(username, password, student=True):
     driver.get("http://localhost:8000/accounts/usernamelogin/")
     try:
         userNameBox = driver.wait.until(EC.presence_of_element_located((By.NAME, "username")))
         userNameBox.send_keys(username)
         userNameBox.submit()
 
-        pwdBox = driver.wait.until(EC.presence_of_element_located((By.NAME, "password")))
+        if student:
+            byVal = "code"
+        else:
+            byVal = "password"
+        pwdBox = driver.wait.until(EC.presence_of_element_located((By.NAME, byVal)))
         pwdBox.send_keys(password)
         pwdBox.submit()
     except Exception as ex:
         print("Could not connect : %s" % ex)
     
-def logout(driver):
+def logout():
     driver.get('http://localhost:8000/accounts/logout')
 
-def profAddClass(classname, inputValue):
+def profAddClass(classname):
     driver.get('http://localhost:8000/professor/lesson/add/')
     try:
         nameBox = driver.wait.until(EC.presence_of_element_located((By.NAME, "name")))
@@ -69,6 +82,9 @@ def profAddClass(classname, inputValue):
     except Exception as ex:
         print("Error : %s" % ex)
 
+def profGetClass(classId):
+    driver.get('http://localhost:8000/professor/lesson/%s/' % classId)
+        
 def profAddStudents(studentList):
     # actually max 2 type = [["firstname", "lastname"], [...]]
     #driver.get('http://localhost:8000/professor/lesson/5/student/add/')
@@ -82,21 +98,41 @@ def profAddStudents(studentList):
     except Exception as ex:
         print("Error : %s" %ex)
         
+# students_password_page
+def getStudentsPassword():
+    driver.get(driver.current_url + "students_password_page")
+    table = driver.find_elements_by_xpath("/html/body/table")
+    studentList = table[0].text.split()
+    studentDict = {}
+    for i in range(len(studentList)//8):
+        studentDict[studentList[i*8].decode() + " " + studentList[1 + i*8].decode()] = [studentList[4 + i*8].decode(), studentList[7 + i*8].decode()]
+    return studentDict
+
+def addPassword(pwd):
+    addValByName(pwd, "password")
+    addValByName(pwd, "confirmed_password", submit=True)
+
 if __name__ == "__main__":
     admin = "oscar02"
     adminPwd = "oscar02"
+    studentList = [["fnselen11", "lnselen11"], ["fnselen22", "lnselen22"]]
     driver = init_driver()
-    loginAdmin(driver, admin, adminPwd)
-    #time.sleep(2)
-    logoutAdmin(driver)
-    #time.sleep(2)
-    login("prof02", "prof02")
-    profAddClass("selenium02", 11)
-    time.sleep(2)
-    profAddStudents([["fnselen01", "lnselen01"], ["fnselen02", "lnselen02"]])
-    #time.sleep(2)
+    #loginAdmin(driver, admin, adminPwd)
+    #logoutAdmin(driver)
+    login("prof02", "prof02", student=False)
+    #profAddClass("selenium03")
+    profGetClass(29)
+    #profAddStudents(studentList)
+    stPwdDict = getStudentsPassword()
+    logout()
+    for student in stPwdDict.keys():
+        print(stPwdDict[student][0] + " " + str(stPwdDict[student][1]))
+        login(stPwdDict[student][0], str(stPwdDict[student][1]))
+        if "http://localhost:8000/accounts/createpassword/" == driver.current_url:
+            addPassword(student)
+        time.sleep(3)
+        logout()
     
     #logout(driver)
-    #time.sleep(2)
     #driver.close()
     # driver.quit()
