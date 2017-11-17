@@ -163,7 +163,7 @@ class OpenHelpRequestsListView(ListView):
         open_help_requests = HelpRequest.objects.filter(
             state=HelpRequest.OPEN,
             skill__in=mastered_skill_list
-        )
+        ).distinct()
         filtered_help_requests = []
         # We only take the requests in the user's area
         for help_request in open_help_requests:
