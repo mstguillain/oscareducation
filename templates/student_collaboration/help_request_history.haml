@@ -42,7 +42,9 @@
           %td Closed
         -else
           %td No thread
-          %td
-            %button{type:"button"}
-              %a{href : "{% url 'change_history' currentStatus help_request.id%}"} Close
+        %td
+          %form{action : "{% url 'help_request_history' %}", method : "GET"}
+            %input{type:"submit", value: "Close"}
+            %input{type:"hidden", name:"id" ,value: "{{help_request.id}}"}
+            %input{type:"hidden", name:"requests" ,value: "{{currentStatus}}"}
     {% endfor %}

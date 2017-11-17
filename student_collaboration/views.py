@@ -105,12 +105,13 @@ def collaborative_home(request):
 
 @login_required
 @user_has_collaborative_tool_active
-def help_request_hist(request, status=None, id=None):
-    if id:
-        hp = HelpRequest.objects.filter(id=id).first()
-        hp.close_request(None, None)
-    # return redirect(reverse('help_request_history', kwargs={'requests': status}))
-    return redirect('help_request_history')
+def help_request_hist(request):
+    if request.GET.get('id',None):
+        hp = HelpRequest.objects.filter(id=request.GET.get('id',None)).first()
+        if hp:
+            if hp.student == request.user.student or hp.tutor == request.user.student:
+                hp.close_request(None, None)
+    return HelpRequestHistory.as_view()(request)
 
 
 @method_decorator(login_required, name='dispatch')
