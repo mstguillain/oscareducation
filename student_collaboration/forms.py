@@ -1,4 +1,5 @@
 from django import forms
+from django.forms import IntegerField, NumberInput
 
 from .models import StudentCollaborator, CollaborativeSettings, HelpRequest
 
@@ -13,6 +14,9 @@ class CollaborativeSettingsForm(forms.ModelForm):
     class Meta:
         model = CollaborativeSettings
         fields = ['distance']
+        widgets = {
+            'distance': NumberInput(attrs={'min':0,'max': '100'})
+        }
 
 
 class UnmasteredSkillsForm(forms.Form):

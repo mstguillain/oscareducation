@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from django.contrib.auth.models import User
 from django.db import models
+
+from forum.models import Thread
 from users.models import Student
 from skills.models import SkillHistory, Skill
 from django.db.models.signals import post_save
@@ -35,7 +38,7 @@ class StudentCollaborator(models.Model):
     #  https://docs.djangoproject.com/en/dev/topics/auth/customizing/#extending-the-existing-user-model
     user = models.OneToOneField(Student, on_delete=models.CASCADE)
     """" postal code : link to a PostalCode object"""
-    postal_code = models.OneToOneField(PostalCode, null=True)
+    postal_code = models.ForeignKey(PostalCode, null=True)
     """" Flag to inform if the user has activated the system for himself """
     collaborative_tool = models.BooleanField(default=False)
     """ The default settings for this user """
@@ -98,6 +101,7 @@ class HelpRequest(models.Model):
     settings = models.ForeignKey(CollaborativeSettings)
 
     """ The conversation """
+    thread = models.ForeignKey(Thread, null=True)
 
     """ The current state of the request """
     requestStatus = (
@@ -141,6 +145,15 @@ class HelpRequest(models.Model):
         self.tutor = user
         """ Status shifts to accepted """
         self.state = HelpRequest.ACCEPTED
+
+        """ We create the thread between the two students """
+        thread = Thread(title="Temp title", author=self.student.user, recipient=user.user)
+        thread.save()
+
+        thread.skills = Skill.objects.filter(pk__in=self.skill.all())
+        thread.save()
+
+        self.thread = thread
         self.save()
 
     def close_request(self, comment=None, close_category=None):

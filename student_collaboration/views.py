@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, get_object_or_404, redirect
+from django.core.checks import messages
+from django.shortcuts import render, get_object_or_404, redirect, render_to_response
 from django.http import HttpResponseRedirect
 from django.utils.decorators import method_decorator
 from django.views.generic import ListView
@@ -35,7 +36,8 @@ def update_settings(request):
             settings.save()
             student.save()
             return HttpResponseRedirect('/student_collaboration/settings/')
-
+        # else:
+            # messages.error(request, "Error")
     else:
         # The user has or doesn't have settings
         settings_pk = None
@@ -51,14 +53,14 @@ def update_settings(request):
 
         settings_form = CollaborativeSettingsForm(instance=settings)
         student_form = StudentCollaboratorForm(instance=student)
-        return render(request, 'student_collaboration/student_settings.haml', {
-            'student_form': student_form,
-            'settings_form': settings_form
-        })
+    return render(request, 'student_collaboration/student_settings.haml', {
+        'student_form': student_form,
+        'settings_form': settings_form
+    })
 
 
 @login_required
-@user_has_collaborative_tool_active
+# @user_has_collaborative_tool_active
 def submit_help_request(request):
     student_collab = get_object_or_404(StudentCollaborator, pk=request.user.student.studentcollaborator.pk)
     list_skills_id = student_collab.get_unmastered_skills()

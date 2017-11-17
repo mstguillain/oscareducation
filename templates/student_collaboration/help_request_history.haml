@@ -12,21 +12,21 @@
 
   %div#filter-history-IO
     %form{action : "{% url 'help_request_history' %}", method : "GET"}
-      %label Show :
+      %label Afficher :
       %select{name : "requests", id : "test"}
-        %option{value : "all", selected} All
-        %option{value : "request"} Requested
-        %option{value : "provide"} Provided
+        %option{value : "all", selected} Tout
+        %option{value : "request"} Aide demandée
+        %option{value : "provide"} Aide fournie
       %input{type : "submit", value : "Filtrer"}
     %br
 
-  %table#history.table.table-bordered.table-hover
+  %table#history.table.table-bordered
     %thead
       %tr
-        %th Skill
+        %th Compétence(s)
         %th Date
-        %th Thread
-        %th Close
+        %th Discussion
+        %th Clôturer
     %tbody
     {% for help_request in open_help_requests %}
       %tr
@@ -37,14 +37,17 @@
           {% endfor %}
         %td {{ help_request.timestamp }}
         -if help_request.state  == "Accepted"
-          %td Thread
+          %td
+            %a.list-group-item{href: "{% url 'view_thread' help_request.thread.pk %}"}
+                .a.text-primary.hover
+                    Ouvrir discussion
         -elif help_request.state == "Closed"
-          %td Closed
+          %td Cloturée
         -else
-          %td No thread
+          %td En attente d'acceptation
         %td
           %form{action : "{% url 'help_request_history' %}", method : "GET"}
-            %input{type:"submit", value: "Close"}
+            %input{type:"submit", value: "Clôturer"}
             %input{type:"hidden", name:"id" ,value: "{{help_request.id}}"}
             %input{type:"hidden", name:"requests" ,value: "{{currentStatus}}"}
     {% endfor %}
