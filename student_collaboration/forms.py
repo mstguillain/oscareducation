@@ -18,7 +18,7 @@ class CollaborativeSettingsForm(forms.ModelForm):
 class UnmasteredSkillsForm(forms.Form):
     def __init__(self, qs=None, *args, **kwargs):
         super(UnmasteredSkillsForm, self).__init__(*args, **kwargs)
-        self.fields['liste'] = forms.ModelMultipleChoiceField(queryset=qs, label="")
+        self.fields['list'] = forms.ModelMultipleChoiceField(queryset=qs, label="")
 
 
 class HelpRequestForm(forms.Form):

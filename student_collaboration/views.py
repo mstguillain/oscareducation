@@ -72,7 +72,7 @@ def submit_help_request(request):
     if request.method == 'POST':
         form = UnmasteredSkillsForm(list_skill_unmastered, request.POST)
         if form.is_valid():  # All validation rules pass
-            form.list = form.cleaned_data['list']
+            form.list = form.cleaned_data["list"]
             settings = get_object_or_404(CollaborativeSettings, pk=request.user.student.studentcollaborator.settings.pk)
             created_hr = student_collab.launch_help_request(settings)
             for skill in form.cleaned_data.get("list"):

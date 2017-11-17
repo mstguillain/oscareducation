@@ -1,36 +1,37 @@
 -extends "student_collaboration/template.haml"
 
 -block content-student
-  {{ open_help_requests|length}}
+
+  :css
+    #provide-help.table thead{
+      background-color:#f57c00;
+    }
+
   {% if True %}
-    %table
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Skill</th>
-          <th>Date</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
+    %table#provide-help.table.table-bordered.table-hover
+      %thead
+        %tr
+          %th Name
+          %th Skill
+          %th Date
+          %th
+      %tbody
       {% for help_request in open_help_requests %}
-        <tr>
-          <td>{{ help_request.student }}</td>
-          <td>
-            <ul>
+        %tr
+          %td {{ help_request.student }}
+          %td
+            %ul
             {% for skill in help_request.skill.all %}
-              <li>{{ skill }}</li>
+              %li {{ skill }}
             {% endfor %}
-            </ul>
-          </td>
-          <td>{{ help_request.timestamp }} </td>
+          %td {{ help_request.timestamp }}
           -if help_request.student.studentcollaborator.pk == currentUserPk
-            <td></td>
+            %td
           -else
-            <td><a href= "{% url 'reply_help' help_request.id %}">Accepter</a> </td>
-        </tr>
+            %td
+              %button{type:"button"}
+                %a{href : "{% url 'reply_help' help_request.id %}"} Accepter
       {% endfor %}
-      </tbody>
     {% else %}
       .well
         Vous ne pouvez aider personne pour le moment.

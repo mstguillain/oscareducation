@@ -3,8 +3,11 @@ from student_collaboration.models import StudentCollaborator,CollaborativeSettin
 
 
 def run():
-    users = Student.objects.all()
-    for user in users:
-        collaborator = StudentCollaborator.objects.filter(user=user)
-        if collaborator.count() < 1:
-            StudentCollaborator.objects.create(user=user)
+    try:
+        users = Student.objects.all()
+        for user in users:
+            collaborator = StudentCollaborator.objects.filter(user=user)
+            if collaborator.count() < 1:
+                StudentCollaborator.objects.create(user=user)
+    except:
+        print("Erreur");

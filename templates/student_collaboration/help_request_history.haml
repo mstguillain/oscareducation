@@ -1,13 +1,32 @@
 -extends "student_collaboration/template.haml"
 
 -block content-student
-  %table{class : "table"}
+  :css
+    #filter-history-IO{
+      padding-bottom: 2%;
+    }
+    #history.table thead{
+      background-color:#f57c00;
+    }
+
+
+  %div#filter-history-IO
+    %form{action : "{% url 'help_request_history' %}", method : "GET"}
+    %label Show :
+    %select{name : "requests", id : "test"}
+      %option{value : "all", selected} All
+      %option{value : "request"} Requested
+      %option{value : "provide"} Provided
+    %input{type : "submit", value : "Filtrer"}
+    %br
+
+  %table#history.table.table-bordered.table-hover
     %thead
       %tr
-        %th{Skill}
-        %th{Date}
-        %th{Thread}
-        %th{Close}
+        %th Skill
+        %th Date
+        %th Thread
+        %th Close
     %tbody
     {% for help_request in open_help_requests %}
       %tr
@@ -18,25 +37,12 @@
           {% endfor %}
         %td {{ help_request.timestamp }}
         -if help_request.state  == "Accepted"
-          %td oui
+          %td Thread
         -elif help_request.state == "Closed"
           %td Closed
         -else
           %td No thread
           %td
             %button{type:"button"}
-              %a{class : btn,  href : "{% url 'change_history' currentStatus help_request.id%}"} Close
+              %a{href : "{% url 'change_history' currentStatus help_request.id%}"} Close
     {% endfor %}
-
-    <th>
-      <form action="{% url 'help_request_history' %}" method="GET">
-      <label>Show :
-          <select name="requests" id="test">
-            <option value="all" selected =>all</option>
-            <option value="request">request</option>
-            <option value="provide">provide</option>s
-          </select>
-      </label>
-      <input type="submit" value="Filtrer">
-      </form>
-    </th>
