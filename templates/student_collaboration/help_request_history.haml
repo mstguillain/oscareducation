@@ -12,12 +12,12 @@
 
   %div#filter-history-IO
     %form{action : "{% url 'help_request_history' %}", method : "GET"}
-    %label Show :
-    %select{name : "requests", id : "test"}
-      %option{value : "all", selected} All
-      %option{value : "request"} Requested
-      %option{value : "provide"} Provided
-    %input{type : "submit", value : "Filtrer"}
+      %label Show :
+      %select{name : "requests", id : "test"}
+        %option{value : "all", selected} All
+        %option{value : "request"} Requested
+        %option{value : "provide"} Provided
+      %input{type : "submit", value : "Filtrer"}
     %br
 
   %table#history.table.table-bordered.table-hover
