@@ -133,6 +133,10 @@ LOGGING = {
             'handlers': ['console'],
             'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
         },
+        'django_crontab': {
+            'handlers': ['console'],
+            'level': 'INFO',
+        }
     },
 }
 
@@ -202,6 +206,6 @@ EMAIL_USE_TLS = True
 
 """ Cron tasks """
 CRONJOBS = [
-    ('*/5 * * * *', 'student_collaboration.cron.set_open_help_request_to_pending'),
-    ('*/5 * * * *', 'student_collaboration.cron.close_pending_help_requests_automatically_when_expired'),
+    ('* * * * *', 'student_collaboration.cron.set_open_help_request_to_pending'),
+    ('* * * * *', 'student_collaboration.cron.close_pending_help_requests_automatically_when_expired'),
 ]

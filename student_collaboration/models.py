@@ -176,6 +176,7 @@ class HelpRequest(models.Model):
 
     def change_state(self, new_state):
         self.state = new_state
+        self.timestamp = datetime.now()
         self.save()
 
     """ Signal : When a skill is mastered, all the open help requests are automatically closed """
