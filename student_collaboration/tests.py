@@ -16,12 +16,16 @@ class CollaborativeSettingsTestCase(TestCase):
         """ The student who is going to ask help  """
         self.newuser = User.objects.create(username="jy95")
         self.student = Student.objects.create(user=self.newuser)
+        # add a settings just to make tests easy
+        StudentCollaborator.objects.filter(user=self.student).update(settings=self.settings1)
         self.founduser = StudentCollaborator.objects.get(user=self.student)
         """ A random skill """
         self.skill_1 = Skill.objects.create(code="B0124", name="Maths", description="Les MATHS")
         """ The student who is going to accept the help request """
         self.newuser2 = User.objects.create(username="OscarLeGrandFrere")
         self.student2 = Student.objects.create(user=self.newuser2)
+        # add a settings just to make tests easy
+        StudentCollaborator.objects.filter(user=self.student2).update(settings=self.settings2)
         self.founduser2 = StudentCollaborator.objects.get(user=self.student2)
 
     def testDistance(self):
@@ -30,7 +34,6 @@ class CollaborativeSettingsTestCase(TestCase):
 
     def testUser(self):
         self.assertEqual(self.founduser.user.user.username, "jy95")
-        self.assertEqual(self.founduser.settings.distance, CollaborativeSettings.DEFAULT_DISTANCE)
         self.assertEqual(self.founduser.collaborative_tool, False)
 
     def testChangeSettings(self):
