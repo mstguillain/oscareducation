@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from django.contrib.auth.models import User
 from django.db import models
 
 from forum.models import Thread
@@ -34,6 +33,9 @@ class PostalCode(models.Model):
 
 
 class StudentCollaborator(models.Model):
+    # the minimal degree where collaboration student should be allowed
+    MINIMAL_DEGREE = 3
+
     # Simple way to extend the user model :
     #  https://docs.djangoproject.com/en/dev/topics/auth/customizing/#extending-the-existing-user-model
     user = models.OneToOneField(Student, on_delete=models.CASCADE)
@@ -75,17 +77,17 @@ class StudentCollaborator(models.Model):
         self.settings = new_settings
         self.save()
 
-    """ https://simpleisbetterthancomplex.com/tutorial/2016/07/22/how-to-extend-django-user-model.html#onetoone """
-    """ Signals: create an StudentCollaborator object when a user is created """
-
-    @receiver(post_save, sender=Student)
-    def create_student_collaborator_profile(sender, instance, created, **kwargs):
-        if created:
-            """ On crée effectivement notre profile """
-            StudentCollaborator.objects.create(
-                user=instance,
-                collaborative_tool=False
-            )
+    # Signals: create an StudentCollaborator object when a user is created
+    # Deactivated because promotion.views at Line 283 use a special way to add relation between student and lesson
+    # student.lesson_set.add(lesson) that doesn't trigger any receiver (post_save,m2m_changed) correctly
+    # @receiver(post_save, sender=Student)
+    # def create_student_collaborator_profile(sender, instance, created, **kwargs):
+    #     if created:
+    #         """ On crée effectivement notre profile """
+    #         StudentCollaborator.objects.create(
+    #             user=instance,
+    #             collaborative_tool=False
+    #         )
 
 
 class HelpRequest(models.Model):
@@ -192,6 +194,6 @@ class HelpRequest(models.Model):
                 state=HelpRequest.CLOSED
             )
             """ Si trouvé, on les ferme """
-            if not helprequest_to_be_closed:
+            if helprequest_to_be_closed:
                 for closed in helprequest_to_be_closed.all():
                     closed.close_request()
