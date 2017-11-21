@@ -130,12 +130,14 @@ class HelpRequest(models.Model):
     CANNOT_HELP = "CANNOT_HELP"
     TRIED_TO_HELP = "TRIED_TO_HELP"
     CLOSED_BY_USER = "USER_CLOSED"
+    HAS_OBTAINED_SKILLS = "HAS_OBTAINED_SKILLS"
 
     closedCategories = (
         (CLOSED_BY_USER, u"Fermé par le demandeur d'aide"),
         (CLOSED_BY_SYSTEM, u"Cloturé par le système"),
         (CANNOT_HELP, u"Ne sait pas aider"),
-        (TRIED_TO_HELP, u"A aidé dans la mesure du possible")
+        (TRIED_TO_HELP, u"A aidé dans la mesure du possible"),
+        (HAS_OBTAINED_SKILLS, u"L'élève a obtenu la/les compétence(s)")
     )
     """ The reason why the help request was closed """
     closedReason = models.CharField(max_length=255, null=True, choices=closedCategories)
@@ -196,4 +198,4 @@ class HelpRequest(models.Model):
             """ Si trouvé, on les ferme """
             if helprequest_to_be_closed:
                 for closed in helprequest_to_be_closed.all():
-                    closed.close_request()
+                    closed.close_request(close_category=HelpRequest.HAS_OBTAINED_SKILLS)
