@@ -51,15 +51,15 @@ class StudentCollaborator(models.Model):
     def __unicode__(self):
         return self.user.__unicode__()
 
-    """" skills mastered by the user"""
+    """" skills mastered or unmastered by the user"""
 
-    def get_mastered_skills(self):
-        return SkillHistory.objects.filter(student=self.user, value="acquired").values_list('skill__id', flat=True)
-
-    """ skills not mastered but already tested once in an examination """
-
-    def get_unmastered_skills(self):
-        return SkillHistory.objects.filter(student=self.user, value='not acquired').values_list('skill__id', flat=True)
+    def get_skills(self, skill_value):
+        skills_not_filtered = SkillHistory.objects.filter(student=self.user)
+        skills_filtered = []
+        for skill in skills_not_filtered:
+            skills_filtered.append(skills_not_filtered.filter(skill_id=skill.skill_id).latest('datetime').id)
+        return SkillHistory.objects.filter(id__in=skills_filtered, value=skill_value).values_list('skill__id',
+                                                                                                   flat=True)
 
     def launch_help_request(self, settings):
         return HelpRequest.objects.create(

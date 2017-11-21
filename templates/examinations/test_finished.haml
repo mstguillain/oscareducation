@@ -15,6 +15,11 @@
     .panel-body
       %p Félicitations, tu as terminé le test "{{ test_student.test.name }}" !
 
+      -if collaborative_tool
+        %p Tu possèdes désormais une compétence te permettant d'aider d'autres étudiants
+        %p
+          %a{href: "{% url 'provide_help' %}"} Proposer de l'aide
+
       -if not pool_form
         %p
           %a{href: "{% url 'student_dashboard' %}"} Revenir à ma page d'accueil
