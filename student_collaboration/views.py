@@ -36,8 +36,6 @@ def update_settings(request):
             settings.save()
             student.save()
             return HttpResponseRedirect('/student_collaboration/settings/')
-        # else:
-            # messages.error(request, "Error")
     else:
         # The user has or doesn't have settings
         settings_pk = None
@@ -63,7 +61,7 @@ def update_settings(request):
 # @user_has_collaborative_tool_active
 def submit_help_request(request):
     student_collab = get_object_or_404(StudentCollaborator, pk=request.user.student.studentcollaborator.pk)
-    list_skills_id = student_collab.get_unmastered_skills()
+    list_skills_id = student_collab.get_skills('not acquired')
     has_a_skill = True
     if list_skills_id:
         list_skill_unmastered = Skill.objects.filter(id__in=list_skills_id)
@@ -161,7 +159,7 @@ class OpenHelpRequestsListView(ListView):
 
     def get_queryset(self):
         """ We fetch the skills mastered by the helper """
-        mastered_skill_list = self.request.user.student.studentcollaborator.get_mastered_skills()
+        mastered_skill_list = self.request.user.student.studentcollaborator.get_skills('acquired')
         open_help_requests = HelpRequest.objects.filter(
             state=HelpRequest.OPEN,
             skill__in=mastered_skill_list
