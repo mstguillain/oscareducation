@@ -72,16 +72,15 @@ def submit_help_request(request):
         has_a_skill = False
 
     if request.method == 'POST':
-        form = UnmasteredSkillsForm(list_skill_unmastered, request.POST)
-        if form.is_valid():  # All validation rules pass
-            form.list = form.cleaned_data["list"]
+        skill_form = UnmasteredSkillsForm(request.POST, skills=list_skill_unmastered, current_user=request.user.student.pk)
+        if skill_form.is_valid():  # All validation rules pass
             settings = get_object_or_404(CollaborativeSettings, pk=request.user.student.studentcollaborator.settings.pk)
             created_hr = student_collab.launch_help_request(settings)
-            for skill in form.cleaned_data.get("list"):
+            for skill in skill_form.cleaned_data.get("list"):
                 created_hr.skill.add(skill)
             return HttpResponseRedirect("/student_collaboration/")
     else:
-        skill_form = UnmasteredSkillsForm(list_skill_unmastered)
+        skill_form = UnmasteredSkillsForm(skills=list_skill_unmastered, current_user=request.user.student.pk)
 
     return render(request, "student_collaboration/request_help.haml", {
         'skill_form': skill_form,
