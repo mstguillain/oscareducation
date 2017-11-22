@@ -8,40 +8,56 @@
     #history.table thead{
       background-color:#f57c00;
     }
+    .form-horizontal .control-label.text-left{
+      text-align: left;
+    }
 
 
   %div#filter-history-IO
-    %form{action : "{% url 'help_request_history' %}", method : "GET"}
-      %label Afficher :
-      %select{name : "requests", id : "test"}
-        %option{value : "all", selected} Tout
-        %option{value : "request"} Aide demandée
-        %option{value : "provide"} Aide fournie
-      %input{type : "submit", value : "Filtrer"}
-    %br
+    %form.form-horizontal{action : "{% url 'help_request_history' %}", method : "GET"}
+      %div.form-group
+        %label.col-sm-1.control-label.text-left Afficher :
+        %div.col-xs-2
+          %select.form-control{name : "requests", id : "test"}
+            %option{value : "all", selected} Tout
+            %option{value : "request"} Aide demandée
+            %option{value : "provide"} Aide fournie
+        %input.btn.btn-primary{type : "submit", value : "Filtrer"}
+    -#%br
 
     %div#closed-history-IO
-    %form{action : "{% url 'help_request_history' %}", method : "GET"}
-      %label  Montrer les requêtes clôturées :
-      -if showClosed == "1"
-        %input{type : "checkbox", value : "Montrer les requêtes clôturées", onChange : "this.form.submit()" }
-        %input{type:"hidden", name:"requests" ,value: "{{currentStatus}}"}
-        %input{type:"hidden", name:"showClosed" ,value: "0"}
-      -else
-        %input{type : "checkbox", value : "Montrer les requêtes clôturées", onChange : "this.form.submit()",checked}
-        %input{type:"hidden", name:"requests" ,value: "{{currentStatus}}"}
-        %input{type:"hidden", name:"showClosed" ,value: "1"}
-    %br
+      %form.form-horizontal{action : "{% url 'help_request_history' %}", method : "GET"}
+        %div.form-group
+          %label.col-sm-3.control-label.text-left  Afficher les requêtes clôturées :
+          -if showClosed == "1"
+            %div.col-xs-1
+              %label.switch
+                %input.form-control{type : "checkbox", value : "Montrer les requêtes clôturées", onChange : "this.form.submit()" }
+                %span.slider.round
+            -#%input{type : "checkbox", value : "Montrer les requêtes clôturées", onChange : "this.form.submit()" }
+            %input{type:"hidden", name:"requests" ,value: "{{currentStatus}}"}
+            %input{type:"hidden", name:"showClosed" ,value: "0"}
+          -else
+            %div.col-xs-1
+              %label.switch
+                %input.form-control{type : "checkbox", value : "Montrer les requêtes clôturées", onChange : "this.form.submit()",checked}
+                %span.slider.round
+            -#%input{type : "checkbox", value : "Montrer les requêtes clôturées", onChange : "this.form.submit()",checked}
+            %input{type:"hidden", name:"requests" ,value: "{{currentStatus}}"}
+            %input{type:"hidden", name:"showClosed" ,value: "1"}
+    -#%br
 
     %div#sort-history-IO
-    %form{action : "{% url 'help_request_history' %}", method : "GET"}
-      %label Trier par :
-      %select{name : "sort", id : "test2"}
-        %option{value : "timestamp", selected} Date
-        %option{value : "skill"} Compétence
-        %option{value : "state"} Status
-      %input{type : "submit", value : "Trier"}
-    %br
+      %form.form-horizontal{action : "{% url 'help_request_history' %}", method : "GET"}
+        %div.form-group
+          %label.col-sm-1.control-label.text-left Trier par :
+          %div.col-xs-2
+            %select.form-control{name : "sort", id : "test2"}
+              %option{value : "timestamp", selected} Date
+              %option{value : "skill"} Compétence
+              %option{value : "state"} Status
+          %input.btn.btn-primary{type : "submit", value : "Trier"}
+    -#%br
 
   %table#history.table.table-bordered
     %thead
