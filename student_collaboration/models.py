@@ -10,6 +10,10 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from datetime import datetime
 
+# the custom way to handle student collaboration
+from promotions.signals import student_added_to_lesson
+from promotions.models import Lesson
+
 
 # Create your models here.
 
@@ -80,14 +84,13 @@ class StudentCollaborator(models.Model):
     # Signals: create an StudentCollaborator object when a user is created
     # Deactivated because promotion.views at Line 283 use a special way to add relation between student and lesson
     # student.lesson_set.add(lesson) that doesn't trigger any receiver (post_save,m2m_changed) correctly
-    # @receiver(post_save, sender=Student)
-    # def create_student_collaborator_profile(sender, instance, created, **kwargs):
-    #     if created:
-    #         """ On crée effectivement notre profile """
-    #         StudentCollaborator.objects.create(
-    #             user=instance,
-    #             collaborative_tool=False
-    #         )
+    @receiver(student_added_to_lesson, sender=Lesson)
+    def create_student_collaborator_profile(sender, student, level, **kwargs):
+        if level >= StudentCollaborator.MINIMAL_DEGREE:
+            StudentCollaborator.objects.create(
+                user=student,
+                collaborative_tool=False
+            )
 
 
 class HelpRequest(models.Model):
