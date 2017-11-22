@@ -1,18 +1,59 @@
 -extends "student_collaboration/template.haml"
 
+{% load widget_tweaks %}
+
 -block content-student
 
-  <form method="post">
+  <form method="post" class="form-horizontal">
     {% csrf_token %}
-    {{ student_form.as_p }}
-    {{ settings_form.as_p }}
-    <button type="submit"> Mettre à jour</button>
+
+    {% for hidden_field in student_form.hidden_fields %}
+      {{ hidden_field}}
+    {% endfor %}
+
+    {% for hidden_field in settings_form.hidden_fields %}
+      {{ hidden_field}}
+    {% endfor %}
+
+
+    %div.form-group
+      %label.col-sm-2.control-label
+        {{ student_form.collaborative_tool.label_tag }}
+
+      {{ student_form.collaborative_tool.errors }}
+      %div.col-sm-1
+        %label.switch
+          {{ student_form.collaborative_tool }}
+          %span.slider.round
+
+    %div.show-form
+      %div.form-group
+        %label.col-sm-2.control-label
+          {{ student_form.postal_code.label_tag }}
+        %div.col-xs-2
+          {{ student_form.postal_code.errors }}
+          {{ student_form.postal_code }}
+
+      %div.form-group
+        %label.col-sm-2.control-label
+          {{ settings_form.distance.label_tag }}
+        %div.col-xs-2
+          {{ settings_form.distance.errors }}
+          {{ settings_form.distance }}
+
+    %div.form-group
+      %div.col-sm-offset-2.col-sm-10
+        <button type="submit" class="btn btn-primary"> Mettre à jour</button>
   </form>
 
   :javascript
     $(document).ready( function() {
-      {% if student_form.collaborative_tool.value  %}
-        alert("I am an alert box!");
-      {% endif %}
+      console.log($("#collaborative_tool_check")[0].checked);
+      if($("#collaborative_tool_check")[0].checked === false){
+        $('.show-form').hide();
+      }
 
-    } );
+      $("#collaborative_tool_check").on("click", function() {
+        $('.show-form').toggle(200);
+       })
+    });
