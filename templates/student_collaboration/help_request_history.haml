@@ -20,6 +20,29 @@
       %input{type : "submit", value : "Filtrer"}
     %br
 
+    %div#closed-history-IO
+    %form{action : "{% url 'help_request_history' %}", method : "GET"}
+      %label  Montrer les requêtes clôturées :
+      -if showClosed == "1"
+        %input{type : "checkbox", value : "Montrer les requêtes clôturées", onChange : "this.form.submit()" }
+        %input{type:"hidden", name:"requests" ,value: "{{currentStatus}}"}
+        %input{type:"hidden", name:"showClosed" ,value: "0"}
+      -else
+        %input{type : "checkbox", value : "Montrer les requêtes clôturées", onChange : "this.form.submit()",checked}
+        %input{type:"hidden", name:"requests" ,value: "{{currentStatus}}"}
+        %input{type:"hidden", name:"showClosed" ,value: "1"}
+    %br
+
+    %div#sort-history-IO
+    %form{action : "{% url 'help_request_history' %}", method : "GET"}
+      %label Trier par :
+      %select{name : "sort", id : "test2"}
+        %option{value : "timestamp", selected} Date
+        %option{value : "skill"} Compétence
+        %option{value : "state"} Status
+      %input{type : "submit", value : "Trier"}
+    %br
+
   %table#history.table.table-bordered
     %thead
       %tr
@@ -37,10 +60,13 @@
           {% endfor %}
         %td {{ help_request.timestamp }}
         -if help_request.state  == "Accepted"
-          %td
-            %a.list-group-item{href: "{% url 'view_thread' help_request.thread.pk %}"}
+          -if help_request.thread
+            %td
+              %a.list-group-item{href: "{% url 'view_thread' help_request.thread.pk %}"}
                 .a.text-primary.hover
                     Ouvrir discussion
+          -else
+            %td Pas de discussion en cours
         -elif help_request.state == "Closed"
           %td Cloturée
         -else

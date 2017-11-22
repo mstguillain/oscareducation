@@ -126,17 +126,26 @@ class HelpRequestHistory(ListView):
     def get_context_data(self, **kwargs):
         context = super(HelpRequestHistory, self).get_context_data(**kwargs)
         context['currentStatus'] = self.request.GET.get('requests', None)
+        context['showClosed'] = self.request.GET.get('showClosed', None)
+        context['sort'] = self.request.GET.get('sort','timestamp')
         return context
 
     def get_queryset(self):
         """We recover help request from User"""
+        order = self.request.GET.get('sort', 'timestamp')
         if self.request.GET.get('requests', None) == "provide":
-            open_help_requests = HelpRequest.objects.filter(tutor=self.request.user.student)
+            open_help_requests = HelpRequest.objects.filter(tutor=self.request.user.student).order_by(order)
         elif self.request.GET.get('requests', None) == "request":
-            open_help_requests = HelpRequest.objects.filter(student=self.request.user.student)
+            open_help_requests = HelpRequest.objects.filter(student=self.request.user.student).order_by(order)
         else:
             open_help_requests = HelpRequest.objects.filter(
-                Q(tutor=self.request.user.student) | Q(student=self.request.user.student))
+                Q(tutor=self.request.user.student) | Q(student=self.request.user.student)).order_by(order)
+        if self.request.GET.get('showClosed', None) == "1":
+            no_closed_help_requests = []
+            for help_request in open_help_requests:
+                if help_request.state != "Closed":
+                    no_closed_help_requests.append(help_request)
+            return no_closed_help_requests
         return open_help_requests
 
 
