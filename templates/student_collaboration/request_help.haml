@@ -1,20 +1,22 @@
 -extends "student_collaboration/template.haml"
 
+{% load widget_tweaks %}
+
 -block content-student
-  .well
-    {% if skill_form.list|length <= 0%}
-      Vous n'avez pour l'instant aucune compétence nécessitant de l'aide
-    {% else %}
-      Vous pouvez demander de l'aide pour les compétences suivantes :
-      <form method="post">
+  {% if skill_form.list|length <= 0%}
+  .transparent-frame.center-block.col-md-8
+    Vous n'avez pour l'instant aucune compétence nécessitant de l'aide
+  {% else %}
+
+    .transparent-frame.center-block.col-lg-6
+      %p Vous pouvez demander de l'aide pour les compétences suivantes :
+
+      %form{method : "post"}
         {% csrf_token %}
-
-        {{ skill_form.as_p }}
-
-        <button type="submit">Send help request</button>
-      </form>
-
-
-
-
-    {% endif %}
+        {% for field in skill_form.visible_fields %}
+          %div.form-group
+            %div
+              {%render_field field class="form-control" %}
+        {% endfor %}
+        %button.btn.btn-primary{type : "submit"} Send help request
+  {% endif %}

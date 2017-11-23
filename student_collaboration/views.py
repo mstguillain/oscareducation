@@ -126,11 +126,12 @@ class HelpRequestHistory(ListView):
     def get_context_data(self, **kwargs):
         context = super(HelpRequestHistory, self).get_context_data(**kwargs)
         context['currentStatus'] = self.request.GET.get('requests', None)
-        context['showClosed'] = self.request.GET.get('showClosed', None)
+        context['showClosed'] = self.request.GET.get('showClosed', 0)
         context['sort'] = self.request.GET.get('sort','timestamp')
         skill_list_id = self.request.user.student.studentcollaborator.get_skills()
         skill_list = Skill.objects.filter(id__in=skill_list_id)
-        context['skills'] = SkillsForm(skills=skill_list, current_user=self.request.user.student.pk)
+        context['skills'] = skill_list
+        # context['skills'] = SkillsForm(skills=skill_list, current_user=self.request.user.student.pk)
         return context
 
     def get_queryset(self):
@@ -143,12 +144,12 @@ class HelpRequestHistory(ListView):
         else:
             open_help_requests = HelpRequest.objects.filter(
                 Q(tutor=self.request.user.student) | Q(student=self.request.user.student)).order_by('-'+order)
-        if self.request.GET.get('showClosed', None) == "1":
-            no_closed_help_requests = []
+        if self.request.GET.get('showClosed', "0") == "0":
+            not_closed_help_requests = []
             for help_request in open_help_requests:
                 if help_request.state != "Closed":
-                    no_closed_help_requests.append(help_request)
-            open_help_requests = no_closed_help_requests
+                    not_closed_help_requests.append(help_request)
+            open_help_requests = not_closed_help_requests
         if self.request.GET.get('list', None):
             filter_help_request = []
             for help_request in open_help_requests:

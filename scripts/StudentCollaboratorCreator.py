@@ -7,7 +7,7 @@ MINIMAL_DEGREE = StudentCollaborator.MINIMAL_DEGREE
 
 
 def run():
-    # the classroom(s) where this query should be runned
+    # the classroom(s) where this query should be run
     lessons = Lesson.objects.filter(stage__level__gte=MINIMAL_DEGREE)
     if lessons:
         users_id = lessons.values_list('students__pk', flat=True)
