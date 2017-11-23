@@ -46,7 +46,7 @@ class UnmasteredSkillsForm(forms.Form):
 
         # checks if the current user has exceed its MAX help request limit
         count = HelpRequest.objects\
-            .filter(student__pk=self.current_user, skill=skills)\
+            .filter(student__pk=self.current_user, skill__in=skills)\
             .exclude(state=HelpRequest.CLOSED)\
             .count()
 
