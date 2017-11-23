@@ -7,10 +7,19 @@
       %div.form-group.col-sm-6
         %label.col-xs-3.control-label.text-left Afficher :
         %div.col-xs-5
-          %select.form-control{name : "requests", id : "test"}
-            %option{value : "all", selected} Tout
-            %option{value : "request"} Aide demandée
-            %option{value : "provide"} Aide fournie
+          %select.form-control{name : "requestType", id : "test"}
+            -if requestType == "all"
+              %option{value : "all", selected} Tout
+            -else
+              %option{value : "all"} Tout
+            -if requestType == "requested"
+              %option{value : "requested", selected} Aide demandée
+            -else
+              %option{value : "requested"} Aide demandée
+            -if requestType == "provided"
+              %option{value : "provided", selected} Aide fournie
+            -else
+              %option{value : "provided"} Aide fournie
         %input.btn.btn-primary{type : "submit", value : "Filtrer"}
         %input{type:"hidden", name:"showClosed" ,value: "{{showClosed}}"}
         %input{type:"hidden", name:"sort",value: "{{sort}}"}
@@ -22,9 +31,18 @@
           %label.col-sm-2.control-label.text-left Trier par :
           %div.col-sm-2
             %select.form-control{name : "sort", id : "test2"}
-              %option{value : "timestamp", selected} Date
-              %option{value : "skill"} Compétence
-              %option{value : "state"} Status
+              -if sort == "timestamp"
+                %option{value : "timestamp", selected} Date
+              -else
+                %option{value : "timestamp"} Date
+              -if sort == "skill"
+                %option{value : "skill", selected} Compétence
+              -else
+                %option{value : "skill"} Compétence
+              -if sort == "state"
+                %option{value : "state", selected} Status
+              -else
+                %option{value : "state"} Status
           %input.btn.btn-primary{type : "submit", value : "Trier"}
           %input{type:"hidden", name:"showClosed" ,value: "{{showClosed}}"}
           %input{type:"hidden", name:"requests" ,value: "{{currentStatus}}"}
@@ -57,9 +75,14 @@
     %form{action : "{% url 'help_request_history' %}", method : "GET"}
       %label.col-sm-6 Ne montrer que les requêtes possédant la compétence :
       %div.col-sm-4
-        %select.form-control
+        %select.form-control{name : "filteredSkill", id : filteredSkillSelect}
+          %option{value : "all"} ----------------------------------------------------------------------------------
           {% for skill in skills %}
-            %option{value : "{{skill.id}}"} {{ skill.name }}
+            {% if skill.id == filteredSkill|add:"0" %}
+              %option{value : "{{skill.id}}", selected} {{ skill.name }}
+            {% else %}
+              %option{value : "{{skill.id}}"} {{ skill.name }}
+            {% endif %}
           {% endfor %}
       %input.btn.btn-primary{type : "submit", value : "Filtrer"}
       %input{type:"hidden", name:"showClosed" ,value: "{{showClosed}}"}

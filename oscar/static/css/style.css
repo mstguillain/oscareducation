@@ -1080,7 +1080,8 @@ input:checked + .slider:before {
     background-color: rgba(255, 255, 255, 0.4);
     text-align: center;
     padding: 10px;
-    float:none
+    float:none;
+    border-radius: 5px;
 }
 
 #provide-help.table thead{
@@ -1099,8 +1100,8 @@ input:checked + .slider:before {
 }
 
 .nav-item-active{
-background-color:#f57c00;
-border-radius: 5px;
+    background-color:#f57c00;
+    border-radius: 5px;
 }
 
 .nav-item-active a{

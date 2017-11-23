@@ -76,7 +76,7 @@ def submit_help_request(request):
             created_hr = student_collab.launch_help_request(settings)
             for skill in skill_form.cleaned_data.get("list"):
                 created_hr.skill.add(skill)
-            return HttpResponseRedirect("/student_collaboration/")
+            return HttpResponseRedirect("/student_collaboration/help_request_history/")
     else:
         skill_form = UnmasteredSkillsForm(skills=list_skill_unmastered, current_user=request.user.student.pk)
 
@@ -127,7 +127,9 @@ class HelpRequestHistory(ListView):
         context = super(HelpRequestHistory, self).get_context_data(**kwargs)
         context['currentStatus'] = self.request.GET.get('requests', None)
         context['showClosed'] = self.request.GET.get('showClosed', 0)
-        context['sort'] = self.request.GET.get('sort','timestamp')
+        context['sort'] = self.request.GET.get('sort', 'timestamp')
+        context['requestType'] = self.request.GET.get('requestType', 'all')
+        context['filteredSkill'] = self.request.GET.get('filteredSkill', 'all')
         skill_list_id = self.request.user.student.studentcollaborator.get_skills()
         skill_list = Skill.objects.filter(id__in=skill_list_id)
         context['skills'] = skill_list
@@ -137,9 +139,9 @@ class HelpRequestHistory(ListView):
     def get_queryset(self):
         """We recover help request from User"""
         order = self.request.GET.get('sort', 'timestamp')
-        if self.request.GET.get('requests', None) == "provide":
+        if self.request.GET.get('requestType', None) == "provided":
             open_help_requests = HelpRequest.objects.filter(tutor=self.request.user.student).order_by('-'+order)
-        elif self.request.GET.get('requests', None) == "request":
+        elif self.request.GET.get('requestType', None) == "requested":
             open_help_requests = HelpRequest.objects.filter(student=self.request.user.student).order_by('-'+order)
         else:
             open_help_requests = HelpRequest.objects.filter(
@@ -150,14 +152,13 @@ class HelpRequestHistory(ListView):
                 if help_request.state != "Closed":
                     not_closed_help_requests.append(help_request)
             open_help_requests = not_closed_help_requests
-        if self.request.GET.get('list', None):
+        if self.request.GET.get('filteredSkill', "all") != "all":
             filter_help_request = []
             for help_request in open_help_requests:
                 for skill in help_request.skill.all():
-                    id_wanted = self.request.GET.get('list', None)
+                    id_wanted = self.request.GET.get('filteredSkill', None)
                     id_found = skill.id
                     if str(id_found) == str(id_wanted):
-                        print("okokok")
                         filter_help_request.append(help_request)
             open_help_requests = filter_help_request
         return open_help_requests
