@@ -6,6 +6,9 @@ from .models import CollaborativeSettings, StudentCollaborator, HelpRequest, Pos
 from users.models import Student
 from django.contrib.auth.models import User
 from skills.models import SkillHistory, Skill
+# Just to simulate the signal send by promotion view
+from promotions.signals import student_added_to_lesson
+from promotions.models import Lesson
 
 
 # Create your tests here.
@@ -16,6 +19,7 @@ class CollaborativeSettingsTestCase(TestCase):
         """ The student who is going to ask help  """
         self.newuser = User.objects.create(username="jy95")
         self.student = Student.objects.create(user=self.newuser)
+        student_added_to_lesson.send(sender=Lesson, student=self.student, level=StudentCollaborator.MINIMAL_DEGREE)
         # add a settings just to make tests easy
         StudentCollaborator.objects.filter(user=self.student).update(settings=self.settings1)
         self.founduser = StudentCollaborator.objects.get(user=self.student)
@@ -24,6 +28,7 @@ class CollaborativeSettingsTestCase(TestCase):
         """ The student who is going to accept the help request """
         self.newuser2 = User.objects.create(username="OscarLeGrandFrere")
         self.student2 = Student.objects.create(user=self.newuser2)
+        student_added_to_lesson.send(sender=Lesson, student=self.student2, level=StudentCollaborator.MINIMAL_DEGREE)
         # add a settings just to make tests easy
         StudentCollaborator.objects.filter(user=self.student2).update(settings=self.settings2)
         self.founduser2 = StudentCollaborator.objects.get(user=self.student2)
