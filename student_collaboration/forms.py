@@ -7,7 +7,15 @@ from .models import StudentCollaborator, CollaborativeSettings, HelpRequest
 class StudentCollaboratorForm(forms.ModelForm):
     class Meta:
         model = StudentCollaborator
-        fields = ['postal_code', 'collaborative_tool']
+        fields = ['collaborative_tool', 'postal_code']
+        # collaborative_tool = forms.CheckboxInput
+        # postal_code = forms.Select
+
+    def __init__(self, *args, **kwargs):
+        qs = kwargs.pop('skills', None)
+        super(StudentCollaboratorForm, self).__init__(*args, **kwargs)
+        self.fields['collaborative_tool'].widget.attrs.update({'class' : 'form-control', 'id': 'collaborative_tool_check'})
+        self.fields['postal_code'].widget.attrs.update({'class': 'form-control'})
 
 
 class CollaborativeSettingsForm(forms.ModelForm):
@@ -17,6 +25,10 @@ class CollaborativeSettingsForm(forms.ModelForm):
         widgets = {
             'distance': NumberInput(attrs={'min':0,'max': '100'})
         }
+    def __init__(self, *args, **kwargs):
+        qs = kwargs.pop('skills', None)
+        super(CollaborativeSettingsForm, self).__init__(*args, **kwargs)
+        self.fields['distance'].widget.attrs.update({'class' : 'form-control'})
 
 
 class UnmasteredSkillsForm(forms.Form):

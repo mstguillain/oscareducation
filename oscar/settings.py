@@ -207,6 +207,6 @@ EMAIL_USE_TLS = True
 
 """ Cron tasks """
 CRONJOBS = [
-    ('* * * * *', 'student_collaboration.cron.set_open_help_request_to_pending'),
-    ('* * * * *', 'student_collaboration.cron.close_pending_help_requests_automatically_when_expired'),
+    ('* * * * *', 'django.core.management.call_command', ['close_pending_help_requests']),
+    ('* * * * *', 'django.core.management.call_command', ['set_help_requests_to_pending']),
 ]
