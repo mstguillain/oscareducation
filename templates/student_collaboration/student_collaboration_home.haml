@@ -2,10 +2,10 @@
 
 -block content-student
   - if not user.student.studentcollaborator.collaborative_tool
-    .well
-      L'outil de collaboration est actuellement désactivé.<br>
+    .transparent-frame.col-md-5.center-block
+      %p L'outil de collaboration est actuellement désactivé.<br>
     %a.btn.btn-primary.btn-lg{href: "{% url 'settings' %}"} Configurer
   - else
-    .well
-      Le module de collaboration est activé
+    .transparent-frame.col-md-5.center-block
+      %p Le module de collaboration est activé
 

@@ -57,7 +57,6 @@ class UnmasteredSkillsForm(forms.Form):
 
 
 class SkillsForm(forms.Form):
-
     def __init__(self, *args, **kwargs):
         qs = kwargs.pop('skills', None)
         self.current_user = kwargs.pop('current_user', None)

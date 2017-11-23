@@ -4,7 +4,7 @@
 
 -block content-student
 
-  <form method="post" class="form-horizontal">
+  %form{ method : "post", class : "form-horizontal"}
     {% csrf_token %}
 
     {% for hidden_field in student_form.hidden_fields %}
@@ -43,8 +43,7 @@
 
     %div.form-group
       %div.col-sm-offset-2.col-sm-10
-        <button type="submit" class="btn btn-primary"> Mettre à jour</button>
-  </form>
+        %button{ type : "submit", class : "btn btn-primary"} Mettre à jour
 
   :javascript
     $(document).ready( function() {

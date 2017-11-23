@@ -2,12 +2,7 @@
 
 -block content-student
 
-  :css
-    #provide-help.table thead{
-      background-color:#f57c00;
-    }
-
-  {% if True %}
+  {% if open_help_requests|length <= 0 %}
     %table#provide-help.table.table-bordered.table-hover
       %thead
         %tr
@@ -33,6 +28,5 @@
                 %a{href : "{% url 'reply_help' help_request.id %}"} Accepter
       {% endfor %}
     {% else %}
-      .well
-        Vous ne pouvez aider personne pour le moment.
+      %p.transparent-frame.col-md-5.center-block  Vous ne pouvez aider personne pour le moment.
     {% endif %}

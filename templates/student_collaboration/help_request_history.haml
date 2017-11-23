@@ -1,23 +1,12 @@
 -extends "student_collaboration/template.haml"
 
 -block content-student
-  :css
-    #filter-history-IO{
-      padding-bottom: 2%;
-    }
-    #history.table thead{
-      background-color:#f57c00;
-    }
-    .form-horizontal .control-label.text-left{
-      text-align: left;
-    }
-
 
   %div#filter-history-IO
     %form.form-horizontal{action : "{% url 'help_request_history' %}", method : "GET"}
-      %div.form-group
-        %label.col-sm-1.control-label.text-left Afficher :
-        %div.col-xs-2
+      %div.form-group.col-sm-6
+        %label.col-xs-3.control-label.text-left Afficher :
+        %div.col-xs-5
           %select.form-control{name : "requests", id : "test"}
             %option{value : "all", selected} Tout
             %option{value : "request"} Aide demandée
@@ -27,34 +16,11 @@
         %input{type:"hidden", name:"sort",value: "{{sort}}"}
     -#%br
 
-    %div#closed-history-IO
-      %form.form-horizontal{action : "{% url 'help_request_history' %}", method : "GET"}
-        %div.form-group
-          %label.col-sm-3.control-label.text-left  Afficher les requêtes clôturées :
-          -if showClosed == "1"
-            %div.col-xs-1
-              %label.switch
-                %input.form-control{type : "checkbox", value : "Montrer les requêtes clôturées", onChange : "this.form.submit()" }
-                %input{type:"hidden", name:"requests" ,value: "{{currentStatus}}"}
-                %input{type:"hidden", name:"showClosed" ,value: "0"}
-                %input{type:"hidden", name:"sort",value: "{{sort}}"}
-                %span.slider.round
-          -else
-            %div.col-xs-1
-              %label.switch
-                %input.form-control{type : "checkbox", value : "Montrer les requêtes clôturées", onChange : "this.form.submit()",checked}
-                %input{type:"hidden", name:"requests" ,value: "{{currentStatus}}"}
-                %input{type:"hidden", name:"showClosed" ,value: "1"}
-                %input{type:"hidden", name:"sort",value: "{{sort}}"}
-                %span.slider.round
-
-    -#%br
-
     %div#sort-history-IO
       %form.form-horizontal{action : "{% url 'help_request_history' %}", method : "GET"}
         %div.form-group
-          %label.col-sm-1.control-label.text-left Trier par :
-          %div.col-xs-2
+          %label.col-sm-2.control-label.text-left Trier par :
+          %div.col-sm-2
             %select.form-control{name : "sort", id : "test2"}
               %option{value : "timestamp", selected} Date
               %option{value : "skill"} Compétence
@@ -64,16 +30,45 @@
           %input{type:"hidden", name:"requests" ,value: "{{currentStatus}}"}
     -#%br
 
+    %div#closed-history-IO.col-sm-12
+      %form.form-horizontal{action : "{% url 'help_request_history' %}", method : "GET"}
+        %div.form-group
+          %label.col-sm-4.control-label.text-left  Afficher les requêtes clôturées :
+          -if showClosed == "1"
+            %div.col-sm-1
+              %label.switch
+                %input.form-control{type : "checkbox", name : "Cacher les requêtes clôturées", onChange : "this.form.submit()", checked, id : "show_closed_checkbox"}
+                %span.slider.round
+              %input{type:"hidden", name:"requests" ,value: "{{currentStatus}}"}
+              %input{type:"hidden", name:"showClosed" ,value: "0"}
+              %input{type:"hidden", name:"sort",value: "{{sort}}"}
+          -else
+            %div.col-sm-1
+              %label.switch
+                %input.form-control{type : "checkbox", name : "Montrer les requêtes clôturées", onChange : "this.form.submit()", id : "show_closed_checkbox"}
+                %span.slider.round
+              %input{type:"hidden", name:"requests" ,value: "{{currentStatus}}"}
+              %input{type:"hidden", name:"showClosed" ,value: "1"}
+              %input{type:"hidden", name:"sort",value: "{{sort}}"}
+
+    -#%br
+
   %div#sortbyskill-history-IO
     %form{action : "{% url 'help_request_history' %}", method : "GET"}
-      %label Ne montrer que les requêtes possédant le skill:
-      {{ skills.as_p }}
-      %input{type : "submit", value : "Trier"}
+      %label.col-sm-6 Ne montrer que les requêtes possédant la compétence :
+      %div.col-sm-4
+        %select.form-control
+          {% for skill in skills %}
+            %option{value : "{{skill.id}}"} {{ skill.name }}
+          {% endfor %}
+      %input.btn.btn-primary{type : "submit", value : "Filtrer"}
       %input{type:"hidden", name:"showClosed" ,value: "{{showClosed}}"}
       %input{type:"hidden", name:"requests" ,value: "{{currentStatus}}"}
       %input{type:"hidden", name:"sort",value: "{{sort}}"}
     %br
-
+  {% if open_help_requests|length <= 0 %}
+    %p.transparent-frame.col-md-6.center-block Votre historique est vide. Essayez de changer les filtres.
+  {% else %}
   %table#history.table.table-bordered
     %thead
       %tr
@@ -94,8 +89,7 @@
           -if help_request.thread
             %td
               %a.list-group-item{href: "{% url 'view_thread' help_request.thread.pk %}"}
-                .a.text-primary.hover
-                    Ouvrir discussion
+                .a.text-primary.hover Ouvrir discussion
           -else
             %td Pas de discussion en cours
         -elif help_request.state == "Closed"
@@ -105,9 +99,10 @@
         %td
           -if help_request.state != "Closed"
             %form{action : "{% url 'help_request_history' %}", method : "GET"}
-              %input{type:"submit", value: "Clôturer"}
+              %input.btn.btn-sm{type:"submit", value: "Clôturer"}
               %input{type:"hidden", name:"id" ,value: "{{help_request.id}}"}
               %input{type:"hidden", name:"requests" ,value: "{{currentStatus}}"}
               %input{type:"hidden", name:"showClosed" ,value: "{{showClosed}}"}
               %input{type:"hidden", name:"sort",value: "{{sort}}"}
     {% endfor %}
+  {% endif %}
