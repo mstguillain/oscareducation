@@ -28,10 +28,12 @@ class Command(BaseCommand):
         hours = options.get("hours", HOURS_BEFORE_PENDING)
         days = options.get("days", DAYS_BEFORE_PENDING)
         weeks = options.get("weeks", WEEKS_BEFORE_PENDING)
+        self.stdout.write("Settings to detect that help requests should be pending :")
+        self.stdout.write("Minutes : %d - Hours : %d - Days : %d - Weeks : %d" % (minutes, hours, days, weeks))
 
         request_list = HelpRequest.objects.filter(
             state=HelpRequest.OPEN,
-            timestamp__gte=datetime.now() - timedelta(hours=hours,
+            timestamp__lte=datetime.now() - timedelta(hours=hours,
                                                       minutes=minutes,
                                                       days=days,
                                                       weeks=weeks)

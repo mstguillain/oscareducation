@@ -28,10 +28,12 @@ class Command(BaseCommand):
         hours = options.get("hours", HOURS_BEFORE_CLOSE)
         days = options.get("days", DAYS_BEFORE_CLOSE)
         weeks = options.get("weeks", WEEKS_BEFORE_CLOSE)
+        self.stdout.write("Settings to detect that help requests should be closed :")
+        self.stdout.write("Minutes : %d - Hours : %d - Days : %d - Weeks : %d" % (minutes, hours, days, weeks))
 
         request_list = HelpRequest.objects.filter(
             state=HelpRequest.PENDING,
-            timestamp__gte=datetime.now() - timedelta(hours=hours,
+            timestamp__lte=datetime.now() - timedelta(hours=hours,
                                                       minutes=minutes,
                                                       days=days,
                                                       weeks=weeks)
@@ -41,7 +43,7 @@ class Command(BaseCommand):
             self.stdout.write("FOUND %s Help request(s) => CLOSED" % request_list.count())
             for help_request in request_list.all():
                 try:
-                    help_request.change_state(HelpRequest.CL)
+                    help_request.change_state(HelpRequest.CLOSED)
                 except:
                     self.stderr.write(self.style.WARNING(u"Problem with HR n° %s" % help_request.pk))
 
