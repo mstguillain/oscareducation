@@ -35,19 +35,19 @@
             %div.col-xs-1
               %label.switch
                 %input.form-control{type : "checkbox", value : "Montrer les requêtes clôturées", onChange : "this.form.submit()" }
+                %input{type:"hidden", name:"requests" ,value: "{{currentStatus}}"}
+                %input{type:"hidden", name:"showClosed" ,value: "0"}
+                %input{type:"hidden", name:"sort",value: "{{sort}}"}
                 %span.slider.round
-            -#%input{type : "checkbox", value : "Montrer les requêtes clôturées", onChange : "this.form.submit()" }
-            %input{type:"hidden", name:"requests" ,value: "{{currentStatus}}"}
-            %input{type:"hidden", name:"showClosed" ,value: "0"}
           -else
             %div.col-xs-1
               %label.switch
                 %input.form-control{type : "checkbox", value : "Montrer les requêtes clôturées", onChange : "this.form.submit()",checked}
+                %input{type:"hidden", name:"requests" ,value: "{{currentStatus}}"}
+                %input{type:"hidden", name:"showClosed" ,value: "1"}
+                %input{type:"hidden", name:"sort",value: "{{sort}}"}
                 %span.slider.round
-            -#%input{type : "checkbox", value : "Montrer les requêtes clôturées", onChange : "this.form.submit()",checked}
-            %input{type:"hidden", name:"requests" ,value: "{{currentStatus}}"}
-            %input{type:"hidden", name:"showClosed" ,value: "1"}
-            %input{type:"hidden", name:"sort",value: "{{sort}}"}
+
     -#%br
 
     %div#sort-history-IO
