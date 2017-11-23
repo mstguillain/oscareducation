@@ -44,6 +44,15 @@ class UnmasteredSkillsForm(forms.Form):
         return skills
 
 
+class SkillsForm(forms.Form):
+
+    def __init__(self, *args, **kwargs):
+        qs = kwargs.pop('skills', None)
+        self.current_user = kwargs.pop('current_user', None)
+        super(SkillsForm, self).__init__(*args, **kwargs)
+        self.fields['list'] = forms.ModelChoiceField(queryset=qs, label="")
+
+
 class HelpRequestForm(forms.Form):
     def __init__(self, *args, **kwargs):
         helprequest = kwargs.pop('HelpRequests')

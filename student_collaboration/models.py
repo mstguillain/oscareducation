@@ -57,13 +57,16 @@ class StudentCollaborator(models.Model):
 
     """" skills mastered or unmastered by the user"""
 
-    def get_skills(self, skill_value):
+    def get_skills(self, skill_value=None):
         skills_not_filtered = SkillHistory.objects.filter(student=self.user)
         skills_filtered = []
         for skill in skills_not_filtered:
             skills_filtered.append(skills_not_filtered.filter(skill_id=skill.skill_id).latest('datetime').id)
-        return SkillHistory.objects.filter(id__in=skills_filtered, value=skill_value).values_list('skill__id',
+        if skill_value:
+            return SkillHistory.objects.filter(id__in=skills_filtered, value=skill_value).values_list('skill__id',
                                                                                                    flat=True)
+        else:
+            return SkillHistory.objects.filter(id__in=skills_filtered).values_list('skill__id', flat=True)
 
     def launch_help_request(self, settings):
         return HelpRequest.objects.create(

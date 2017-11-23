@@ -12,7 +12,7 @@ from django.urls import reverse
 from student_collaboration.models import StudentCollaborator, CollaborativeSettings, HelpRequest
 from users.models import Student
 from skills.models import Skill
-from .forms import StudentCollaboratorForm, CollaborativeSettingsForm, UnmasteredSkillsForm, HelpRequestForm
+from .forms import StudentCollaboratorForm, CollaborativeSettingsForm, UnmasteredSkillsForm, HelpRequestForm, SkillsForm
 from math import sin, cos, sqrt, atan2, radians
 from decorators import user_has_collaborative_tool_active
 
@@ -128,24 +128,37 @@ class HelpRequestHistory(ListView):
         context['currentStatus'] = self.request.GET.get('requests', None)
         context['showClosed'] = self.request.GET.get('showClosed', None)
         context['sort'] = self.request.GET.get('sort','timestamp')
+        skill_list_id = self.request.user.student.studentcollaborator.get_skills()
+        skill_list = Skill.objects.filter(id__in=skill_list_id)
+        context['skills'] = SkillsForm(skills=skill_list, current_user=self.request.user.student.pk)
         return context
 
     def get_queryset(self):
         """We recover help request from User"""
         order = self.request.GET.get('sort', 'timestamp')
         if self.request.GET.get('requests', None) == "provide":
-            open_help_requests = HelpRequest.objects.filter(tutor=self.request.user.student).order_by(order)
+            open_help_requests = HelpRequest.objects.filter(tutor=self.request.user.student).order_by('-'+order)
         elif self.request.GET.get('requests', None) == "request":
-            open_help_requests = HelpRequest.objects.filter(student=self.request.user.student).order_by(order)
+            open_help_requests = HelpRequest.objects.filter(student=self.request.user.student).order_by('-'+order)
         else:
             open_help_requests = HelpRequest.objects.filter(
-                Q(tutor=self.request.user.student) | Q(student=self.request.user.student)).order_by(order)
+                Q(tutor=self.request.user.student) | Q(student=self.request.user.student)).order_by('-'+order)
         if self.request.GET.get('showClosed', None) == "1":
             no_closed_help_requests = []
             for help_request in open_help_requests:
                 if help_request.state != "Closed":
                     no_closed_help_requests.append(help_request)
-            return no_closed_help_requests
+            open_help_requests = no_closed_help_requests
+        if self.request.GET.get('list', None):
+            filter_help_request = []
+            for help_request in open_help_requests:
+                for skill in help_request.skill.all():
+                    id_wanted = self.request.GET.get('list', None)
+                    id_found = skill.id
+                    if str(id_found) == str(id_wanted):
+                        print("okokok")
+                        filter_help_request.append(help_request)
+            open_help_requests = filter_help_request
         return open_help_requests
 
 

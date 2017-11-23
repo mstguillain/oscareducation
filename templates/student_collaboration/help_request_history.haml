@@ -9,18 +9,19 @@
       background-color:#f57c00;
     }
 
-
   %div#filter-history-IO
     %form{action : "{% url 'help_request_history' %}", method : "GET"}
       %label Afficher :
       %select{name : "requests", id : "test"}
-        %option{value : "all", selected} Tout
+        %option{value : "all"} Tout
         %option{value : "request"} Aide demandée
         %option{value : "provide"} Aide fournie
       %input{type : "submit", value : "Filtrer"}
+      %input{type:"hidden", name:"showClosed" ,value: "{{showClosed}}"}
+      %input{type:"hidden", name:"sort",value: "{{sort}}"}
     %br
 
-    %div#closed-history-IO
+  %div#closed-history-IO
     %form{action : "{% url 'help_request_history' %}", method : "GET"}
       %label  Montrer les requêtes clôturées :
       -if showClosed == "1"
@@ -31,9 +32,10 @@
         %input{type : "checkbox", value : "Montrer les requêtes clôturées", onChange : "this.form.submit()",checked}
         %input{type:"hidden", name:"requests" ,value: "{{currentStatus}}"}
         %input{type:"hidden", name:"showClosed" ,value: "1"}
+        %input{type:"hidden", name:"sort",value: "{{sort}}"}
     %br
 
-    %div#sort-history-IO
+  %div#sort-history-IO
     %form{action : "{% url 'help_request_history' %}", method : "GET"}
       %label Trier par :
       %select{name : "sort", id : "test2"}
@@ -41,6 +43,18 @@
         %option{value : "skill"} Compétence
         %option{value : "state"} Status
       %input{type : "submit", value : "Trier"}
+      %input{type:"hidden", name:"showClosed" ,value: "{{showClosed}}"}
+      %input{type:"hidden", name:"requests" ,value: "{{currentStatus}}"}
+    %br
+
+  %div#sortbyskill-history-IO
+    %form{action : "{% url 'help_request_history' %}", method : "GET"}
+      %label Ne montrer que les requêtes possédant le skill:
+      {{ skills.as_p }}
+      %input{type : "submit", value : "Trier"}
+      %input{type:"hidden", name:"showClosed" ,value: "{{showClosed}}"}
+      %input{type:"hidden", name:"requests" ,value: "{{currentStatus}}"}
+      %input{type:"hidden", name:"sort",value: "{{sort}}"}
     %br
 
   %table#history.table.table-bordered
@@ -72,8 +86,11 @@
         -else
           %td En attente d'acceptation
         %td
-          %form{action : "{% url 'help_request_history' %}", method : "GET"}
-            %input{type:"submit", value: "Clôturer"}
-            %input{type:"hidden", name:"id" ,value: "{{help_request.id}}"}
-            %input{type:"hidden", name:"requests" ,value: "{{currentStatus}}"}
+          -if help_request.state != "Closed"
+            %form{action : "{% url 'help_request_history' %}", method : "GET"}
+              %input{type:"submit", value: "Clôturer"}
+              %input{type:"hidden", name:"id" ,value: "{{help_request.id}}"}
+              %input{type:"hidden", name:"requests" ,value: "{{currentStatus}}"}
+              %input{type:"hidden", name:"showClosed" ,value: "{{showClosed}}"}
+              %input{type:"hidden", name:"sort",value: "{{sort}}"}
     {% endfor %}
