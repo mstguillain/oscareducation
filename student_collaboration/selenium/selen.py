@@ -1,4 +1,5 @@
 import os
+import traceback
 import time
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -20,8 +21,8 @@ STUDENTS = (
 )
 
 STUDENTS_SKILLS = (
-	("P3D-U3-T2",),
-	()
+	{"mastered":("P3D-U3-T2", "P3D-U3-C2"), "unmastered":("P3D-U3-A2",)},
+	{"unmastered": ("P3D-U3-T2", "P3D-U3-C2"), "mastered": ("P3D-U3-A2",)}
 )
 
 
@@ -49,6 +50,7 @@ class Selenium:
 		self.__testFunction(self.addStudents, STUDENTS)
 		self.__testFunction(self.setSkillsToStudent, STUDENTS_SKILLS)
 
+		#self.fakeTest()
 
 	def __testFunction(self, fun, *args):
 		""" Test a given function on the given arguements"""
@@ -57,20 +59,29 @@ class Selenium:
 		try:
 			fun(*args)
 			print("\tOK")
-		except TimeoutException as tex:
-			print("\tERROR (Timeout) : "+ str(tex.args) +" One of the demanded ressource took to much time to be found. It's likely that it didn't existed or the page wasn't loaded/redirected as expected")
-		except WebDriverException as wex:
-			print("\tError (WebDriver) : ") + str(wex.args) + " The content have not beel loaded yet (need to call wait method)"
-		except Exception as ex:
-			print "\tERROR: " + str(ex.args)
-		except BaseException as e:
+		except TimeoutException as e:
+			traceback.print_exc(e)
+			print("\tERROR (Timeout) : "+ str(e.args) +" One of the demanded ressource took to much time to be found. It's likely that it didn't existed or the page wasn't loaded/redirected as expected")
+		except WebDriverException as e:
+			traceback.print_exc(e)
+			print("\tError (WebDriver) : ") + str(e.args) + " The content have not beel loaded yet (need to call wait method)"
+		except Exception as e:
+			traceback.print_exc(e)
 			print "\tERROR: " + str(e.args)
+		except BaseException as e:
+			traceback.print_exc(e)
+			print "\tERROR: " + str(e.args)
+
+
 
 	def __waitElementByName(self, name):
 		return self.driver.wait.until(EC.presence_of_element_located((By.NAME, name)))
 
 	def __waitElementByXPath(self, xPath):
 		return self.driver.wait.until(EC.presence_of_element_located((By.XPATH, xPath)))
+
+	def __waitElementByClassName(self, className):
+		return self.driver.wait.until(EC.presence_of_element_located((By.CLASS_NAME, className)))
 
 	def __fillBoxSubmit(self, name, text):
 		box = self.__fillBox(name, text)
@@ -83,8 +94,9 @@ class Selenium:
 
 	def __clickButtonByXPath(self, xPath):
 		button = WebDriverWait(self.driver, self.TIMEOUT_BUTTON_WAIT).until(EC.element_to_be_clickable((By.XPATH, xPath)))
-		actions = ActionChains(self.driver)
-		actions.click(button).perform()
+		# Do not try to create a parameter for this, it make crashs
+		action = ActionChains(self.driver)
+		action.click(button).perform()
 
 	def __testURL(self, lastURL, *exceptionArgs):
 		""" Test si l'url match l'URL courante """
@@ -159,87 +171,58 @@ class Selenium:
 
 	def setSkillsToStudent(self, studentSkillsList):
 		""" We consider that we are on lesson dashboard """
-		saveUrl = self.driver.current_url
+		#self.driver.get("http://127.0.0.1:8000/professor/lesson/4") # TODO : to delete
+		initUrl = self.driver.current_url
 		# if we get the id of the first created student then it's easy to find the other one (just +1)
 		xPathFirstTableEntry = '//*[@id="students"]/div[4]/div/table/tbody/tr[1]/td[1]/a'
 		entry = self.__waitElementByXPath(xPathFirstTableEntry)#self.driver.find_element_by_xpath(xPathFirstTableEntry)
-		print entry.get_attribute("href")
+		href = entry.get_attribute("href")
+		# get the id : 'http://127.0.0.1:8000/professor/lesson/1/student/1134/' -> 1134
+		firstStudentIdStr = href[href[0:-2].rfind("/")+1:-1]
+		firstStudentId = int(firstStudentIdStr)
 
+		studentNumber = len(studentSkillsList)
+		for i in range(studentNumber):
+			studentId = firstStudentId+i
+			urlToStudent = initUrl+"student/"+str(studentId)+"/"
+			skillTab = "#heatmap"
+			# We load the page where all its skills are
+			self.driver.get(urlToStudent+skillTab)
+			studentSkillsDict = studentSkillsList[i]
+			for masteredStr, skillList in studentSkillsDict.iteritems():
+				for skillStr in skillList:
+					# We first make the popup appear
 
-"""
-def addValByName(val, name, submit=False):
-	try:
-		box = driver.wait.until(EC.presence_of_element_located((By.NAME, name)))
-		box.clear()
-		box.send_keys(val)
-		if submit:
-			box.submit()
-	except Exception as ex:
-		print(ex)
+					# Be careful here to have an exact match, because after a skill is mastered it had invisible things with the name as well
+					xPath = '//*[text()="{0}"]/..'.format(skillStr)
+					# It won't appear if it is not in the scrolling view, so we center the button before clicking it
+					button = self.__waitElementByXPath(xPath)
+					centerY = button.location['y'] - self.driver.get_window_size()['height']//2
+					self.driver.execute_script("window.scrollTo(0, " + str(centerY) + ");")
 
+					self.__clickButtonByXPath(xPath)
+#                   self.__clickButtonByXPath('//*[contains(text(), "{0}")]/..'.format(skillStr)) # DO NOT CALL, I don't know why but the function does not work there
 
-def findElemByValue(elem, val):
-	print(elem)
-	print(val)
-	print("//" + elem + "[contains(text(), " + val + ")]")
-	eList = driver.find_elements_by_xpath("//" + elem + "[contains(text(), " + val + ")]")  # doesn't work correctly
-	for e in eList:
-		print(e.text)
-		if val.lower() in e.text.lower():
-			return e
-	print("Couldn't find the value '%s'" % val)
+					# As it appears we set the skill
+					# The order is the one the buttons are displayed on the popup
+					SKILL_MASTERED = 1
+					SKILL_UNMASTERED = 2
+					SKILL_UNKNOWN = 3
+					if (masteredStr == "mastered"):
+						skillIdx = SKILL_MASTERED
+					else:
+						skillIdx = SKILL_UNMASTERED
+					test = self.__waitElementByClassName('popover-content')
+					# Acess the correct button
+					child = test.find_element_by_xpath("//div[2]/center/form[" + str(skillIdx) + "]")
+					child.submit()
 
+	def fakeTest(self):
+		""" ca c'est juste pour faire des petit test vite fait """
+		url = "http://127.0.0.1:8000/professor/lesson/4/student/1140/#heatmap"
+		self.driver.get(url)
 
-def login(username, password, student=True):
-	driver.get("http://localhost:8000/accounts/usernamelogin/")
-	try:
-		userNameBox = driver.wait.until(EC.presence_of_element_located((By.NAME, "username")))
-		userNameBox.send_keys(username)
-		userNameBox.submit()
-
-		if student:
-			byVal = "code"
-		else:
-			byVal = "password"
-		pwdBox = driver.wait.until(EC.presence_of_element_located((By.NAME, byVal)))
-		pwdBox.send_keys(password)
-		pwdBox.submit()
-	except Exception as ex:
-		print("Could not connect : %s" % ex)
-
-
-def logout():
-	driver.get('http://localhost:8000/accounts/logout')
-"""
-
-def profSetSkill(classId, studentName):
-	driver.get('http://localhost:8000/professor/lesson/%s/' % classId)
-	# table = driver.wait.until(EC.presence_of_element_located((By.XPATH, "/html/body/div[2]/div[2]/div/div/div[4]/div/table/tbody")
-	driver.find_elements_by_xpath("//a[contains(text(), " + studentName + ")]")
-
-	# driver.get('/professor/lesson/%s/skill/%s/' % (classId, skillCode))
-
-
-def profGetClass(className):
-	driver.get("http://localhost:8000/professor/dashboard/")
-	classA = findElemByValue("a", className)
-	classA.click()
-
-
-
-def addSkillToStudent(student, skillCode):
-	studentElem = findElemByValue("a", student.split()[0].lower())
-	studentElem.click()
-	driver.get(driver.current_url[:-1] + "#heatmap")
-	studentElem = findElemByValue("abbr", skillCode)
-	print(type(studentElem))
-	print(studentElem)
-	print(studentElem.text)
-
-	# studentElem.submit()
-	# studentElem.click()
-
-
+##### NEED TO BE ADAPTED ######
 # students_password_page
 def getStudentsPassword():
 	driver.get(driver.current_url + "students_password_page")
@@ -261,7 +244,7 @@ if __name__ == '__main__':
 	selenium.test()
 
 
-if False:
+if False: # Ancien main, on l'apelle pas
 	admin = "root"
 	adminPwd = "root"
 	#classId = 29
