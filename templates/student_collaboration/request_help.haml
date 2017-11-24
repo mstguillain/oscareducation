@@ -16,6 +16,13 @@
       %form{method : "post"}
         {% csrf_token %}
         {% for field in skill_form.visible_fields %}
+          {% if field.errors %}
+            %ul
+              {% for error in field.errors %}
+                %li
+                  {{ error }}
+              {% endfor %}
+          {% endif %}
           %div.form-group
             %div
               {%render_field field class="form-control" %}

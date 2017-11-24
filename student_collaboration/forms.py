@@ -49,6 +49,7 @@ class UnmasteredSkillsForm(forms.Form):
         count = HelpRequest.objects\
             .filter(student__pk=self.current_user, skill__in=skills)\
             .exclude(state=HelpRequest.CLOSED)\
+            .distinct()\
             .count()
 
         if count >= HelpRequest.MAX_HELP_REQUEST_BY_SKILLS:
