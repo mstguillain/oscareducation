@@ -92,6 +92,7 @@ def open_help_request(request, id=None):
     if id:
         hp = HelpRequest.objects.filter(id=id).first()
         hp.reply_to_unanswered_help_request(request.user.student)
+        return HttpResponseRedirect('/student_collaboration/help_request_history/thread/' + str(hp.thread.pk))
 
     """ We redirect to the list view """
     return redirect('provide_help')
@@ -133,6 +134,7 @@ class HelpRequestHistory(ListView):
         skill_list_id = self.request.user.student.studentcollaborator.get_skills()
         skill_list = Skill.objects.filter(id__in=skill_list_id)
         context['skills'] = skill_list
+        context['closeReasons'] = HelpRequest.closedCategories
         # context['skills'] = SkillsForm(skills=skill_list, current_user=self.request.user.student.pk)
         return context
 
@@ -212,3 +214,13 @@ class OpenHelpRequestsListView(ListView):
         """ https://stackoverflow.com/a/33350839/6149867 """
 
         return filtered_help_requests
+
+@login_required
+@user_has_collaborative_tool_active
+def extend_help_request(request):
+    if request.GET.get('id', None):
+        hp = HelpRequest.objects.filter(id=request.GET.get('id', None)).first()
+        if hp:
+            if hp.student == request.user.student:
+                hp.extend_request()
+    return HelpRequestHistory.as_view()(request)

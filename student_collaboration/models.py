@@ -159,7 +159,8 @@ class HelpRequest(models.Model):
         self.state = HelpRequest.ACCEPTED
 
         """ We create the thread between the two students """
-        thread = Thread(title="Temp title", author=self.student.user, recipient=user.user)
+        thread = Thread(title="Aide " + self.student.user.first_name + " par " + user.user.first_name,
+                        author=self.student.user, recipient=user.user)
         thread.save()
 
         thread.skills = Skill.objects.filter(pk__in=self.skill.all())
@@ -181,6 +182,9 @@ class HelpRequest(models.Model):
         else:
             self.closedReason = HelpRequest.CLOSED_BY_SYSTEM
         self.save()
+
+    def extend_request(self):
+        self.change_state(self.OPEN)
 
     def change_settings(self, new_settings):
         self.settings = new_settings

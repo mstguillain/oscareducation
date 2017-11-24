@@ -12,5 +12,6 @@ urlpatterns = [
     url(r'^provide_help/$', views.OpenHelpRequestsListView.as_view(), name='provide_help'),
     url('^provide_help/([0-9]+)$', views.open_help_request, name='reply_help'),
     url(r'^help_request_history/$', views.help_request_hist, name='help_request_history'),
-    url(r'^help_request_history/thread/(?P<id>\d+)$', thread, name='view_thread')
+    url(r'^help_request_history/thread/(?P<id>\d+)$', thread, name='view_thread'),
+    url(r'^extend_help_request/$',views.extend_help_request, name='extend_help_request')
 ]

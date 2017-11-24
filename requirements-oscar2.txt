@@ -30,3 +30,5 @@ sqlparse==0.2.3
 sphinx==1.6.3
 pandas==0.20.3
 xlrd==1.1.0
+selenium==3.7.0
+
