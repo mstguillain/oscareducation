@@ -15,7 +15,6 @@
           %button.btn.btn-primary#edit-confirm{:type => "submit", :disabled} Confirm
     -else
       %div= message.content
-
   .panel-footer
     %span.flex-spacer
     -if user|can_update:message
@@ -36,3 +35,4 @@
 
 - for reply in message.replies
   {% message_partial reply user reply_to edit level %}
+
