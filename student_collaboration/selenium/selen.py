@@ -23,7 +23,7 @@ STUDENTS = (
 )
 
 STUDENTS_SKILLS = (
-	{"mastered":("P3D-U3-T2", "P3D-U3-C2"), "unmastered":("P3D-U3-A2",)},
+	{"mastered":("P3D-U3-T2", "P3D-U3-C2"), "unmastered":("P3D-U3-A2",)},   # Careful to master skill that other don't
 	{"unmastered": ("P3D-U3-T2", "P3D-U3-C2"), "mastered": ("P3D-U3-A2",)}
 )
 
@@ -102,7 +102,7 @@ class Selenium:
 		self.__testFunction(self.activateCollaborativeTool, studentParams[0], studentParams[1])
 		# The first to connect ask for help
 		askRequestText = self.__testFunction(self.askHelp)
-		print 'ask'+askRequestText
+		#print 'ask'+askRequestText
 		self.logOutUser()
 
 		# With the second one we check that the help request exists
