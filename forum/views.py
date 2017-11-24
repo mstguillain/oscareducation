@@ -1,17 +1,22 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from datetime import datetime
+
 from django import forms
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.db import transaction
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponseRedirect, HttpResponse
+from django.utils.timezone import utc
 from django.views.decorators.http import require_POST, require_GET
 from django.http import JsonResponse
 
 # Create your views here.
-from forum.models import Thread, Message
+from numpy.ma import copy
+
+from forum.models import Thread, Message, LastThreadVisit, MessageAttachment
 
 from promotions.models import Lesson
 from skills.models import Skill, Section
@@ -22,6 +27,8 @@ from dashboard import get_thread_set
 
 
 class MessageReplyForm(forms.ModelForm):
+    file = forms.FileField(required=False, label='file')
+
     class Meta:
         model = Message
         fields = ('content',)
@@ -271,7 +278,7 @@ def post_create_thread(request):
                 thread.skills = params['fetched_skills']
                 thread.save()
 
-            original_message = Message(content=params['content'], thread=thread, author=params['author'])
+            original_message = Message(content=params['content'], thread=thread, author=params['author'], created_date=utc.localize(datetime.now()), modified_date=utc.localize(datetime.now()))
             original_message.save()
 
         return redirect(thread)
@@ -385,10 +392,44 @@ def thread(request, id):
         return reply_thread(request, id)
 
 
+def get_last_visit(user, thread):
+    if LastThreadVisit.objects.filter(user=user, thread=thread).exists():
+        last_visit = LastThreadVisit.objects.get(user=user, thread=thread)
+        date = last_visit.last_visit
+        last_visit.last_visit = utc.localize(datetime.now())
+    else:
+        last_visit = LastThreadVisit(user=user, thread=thread, last_visit=utc.localize(datetime.now()))
+        date = utc.localize(datetime.min)
+    last_visit.save()
+    return date
+
+
+def get_file(request):
+    # Check if user as access to this file
+
+    threads = get_thread_set(request.user)
+    message = get_object_or_404(Message, pk=request.message.id)
+    if message.thread not in threads:
+        return HttpResponse(status=403)
+
+    attachment = get_object_or_404(MessageAttachment, pk=request.message)
+
+    filename = attachment.file.name.split('/')[-1]
+    response = HttpResponse(attachment.file, content_type='text/plain')
+    response['Content-Disposition'] = 'attachment; filename=%s' % filename
+
+    return render();
+
+
 def get_thread(request, id):
     thread = get_object_or_404(Thread, pk=id)
     messages = thread.messages()
 
+    attachments = ()
+    # for m in messages:
+        # attachments += m.attachments()
+
+    last_visit = get_last_visit(request.user, thread)
     reply_to = request.GET.get('reply_to')
     edit = request.GET.get('edit')
 
@@ -404,6 +445,8 @@ def get_thread(request, id):
         "thread": thread,
         "messages": messages,
         "reply_to": reply_to,
+        "last_visit": last_visit,
+        "attachments": attachments,
         "edit": edit
     })
 
@@ -417,8 +460,12 @@ def reply_thread(request, id):
     if form.is_valid():
         content = form.cleaned_data['content']
 
+        message = Message.objects.create(content=content, thread=thread, author=author,
+                                         created_date=utc.localize(datetime.now()), modified_date=utc.localize(datetime.now()))
+
+
         with transaction.atomic():
-            message = Message.objects.create(content=content, thread=thread, author=author)
+            message = Message.objects.create(content=content, thread=thread, author=author, created_date=utc.localize(datetime.now()), modified_date=utc.localize(datetime.now()))
 
             if message_id is not None:
                 parent_message = get_object_or_404(Message, pk=message_id)
