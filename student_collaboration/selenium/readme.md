@@ -1,6 +1,8 @@
-#Selenium Tests
+# Selenium Tests
+
 We use Selenium in our project in order to test the different views related to our module (student collaborative tool)
 
+## Installation and uses
 
 
 ### Parametrization
