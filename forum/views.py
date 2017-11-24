@@ -11,7 +11,12 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponseRedirect, HttpResponse
 from django.utils.timezone import utc
 from django.views.decorators.http import require_POST, require_GET
+
+from notification.notif_types import NOTIF_TYPES
+from notification.notification_manager import NOTIF_MEDIUM, sendNotification
+
 from django.http import JsonResponse
+
 
 # Create your views here.
 from numpy.ma import copy
@@ -33,7 +38,6 @@ class MessageReplyForm(forms.ModelForm):
         model = Message
         fields = ('content',)
 
-
 def require_login(function):
     return login_required(function, login_url="/accounts/usernamelogin")
 
@@ -46,7 +50,6 @@ def forum_dashboard(request):
         "user": request.user,
         "threads": threads
     })
-
 
 @require_login
 def create_thread(request):
@@ -278,10 +281,17 @@ def post_create_thread(request):
                 thread.skills = params['fetched_skills']
                 thread.save()
 
+            sendNotification(getWSNotificationForNewThread(thread))
+
+
             original_message = Message(content=params['content'], thread=thread, author=params['author'], created_date=utc.localize(datetime.now()), modified_date=utc.localize(datetime.now()))
             original_message.save()
 
+
+            sendNotification(getNotificationForNewMessage(original_message))
+
         return redirect(thread)
+
 
     else:
         skills, sections = get_skills(request)
@@ -298,6 +308,67 @@ def post_create_thread(request):
 
         return render(request, "forum/new_thread.haml", {"errors": errors, "data": params})
 
+
+def getWSNotificationForNewThread(thread):
+
+    notif = {
+        "medium": NOTIF_MEDIUM["WS"],
+        "audience": [],
+        "params": {
+            "thread_id": str(thread.id),
+            "thread_title": thread.title,
+            "author": {
+                "id": thread.author.id,
+                "first_name": thread.author.first_name,
+                "last_name": thread.author.last_name
+            }
+        }
+    }
+
+    if thread.professor != None:
+
+        notif["type"] = NOTIF_TYPES["NEW_PUBLIC_FORUM_THREAD"]
+        notif["params"]["classes"] = []
+
+        try:
+            for l in thread.professor.lesson_set.all():
+                notif["audience"].append('notification-class-' + str(l.id))
+                notif["params"]["classes"].append({
+                    "id": l.id,
+                    "name": l.name
+                })
+        except:
+            pass
+
+    elif thread.lesson != None:
+        notif["type"] = NOTIF_TYPES["NEW_CLASS_FORUM_THREAD"]
+        notif["audience"] = [ 'notification-class-' + str(thread.lesson.id) ]
+        notif["params"]["class"] = {
+            "id": thread.lesson.id,
+            "name": thread.lesson.name
+        }
+    elif thread.recipient != None:
+        notif["type"] = NOTIF_TYPES["NEW_PRIVATE_FORUM_THREAD"]
+        notif["audience"] = [ 'notification-user-' + str(thread.recipient.id) ]
+
+    return notif
+
+def getNotificationForNewMessage(message):
+
+    notif = getWSNotificationForNewThread(message.thread)
+
+    notif["type"] = notif["type"].replace("thread", "message")
+    notif["params"]["author"] = {
+        "id": message.author.id,
+        "first_name": message.author.first_name,
+        "last_name": message.author.last_name
+    }
+    notif["params"]["msg_id"] = message.id
+
+    if (message.thread.recipient != None) and (message.author != message.thread.author):
+        notif["audience"] = ['notification-user-' + str(message.thread.author.id)]
+
+    return notif
 
 class ThreadForm(forms.Form):
     section = forms.CharField()
@@ -343,7 +414,6 @@ def deepValidateAndFetch(request, errors):
         params['content'] = ""
         errors.append({"field": "content", "msg": "Le premier message du sujet ne peut pas être vide"})
 
-    # Shouldn't fail with require_login
     params['author'] = User.objects.get(pk=request.user.id)
 
     if params['visibility'] not in ["private", "class", "public"]:
@@ -457,6 +527,7 @@ def reply_thread(request, id):
 
     form = MessageReplyForm(request.POST)  # request.Post contains the data we want
     author = User.objects.get(pk=request.user.id)
+
     if form.is_valid():
         content = form.cleaned_data['content']
 
@@ -474,6 +545,8 @@ def reply_thread(request, id):
             message.save()
             thread.modified_date = message.created_date
             thread.save()
+
+        sendNotification(getNotificationForNewMessage(message))
 
         return redirect(message)
     else:
