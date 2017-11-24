@@ -2,9 +2,6 @@
 -load static
 -load compress
 
--block bootstrap3_title
-  Oscar
-
 -block bootstrap3_extra_head
   %script{type: "text/javascript", async: None, src: "//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-MML-AM_CHTML"}
 
@@ -14,7 +11,7 @@
     %script{type: "text/javascript", src: "{% static 'js/angular-cookies.js' %}"}
     -#%script{type: "text/javascript", src: "{% static 'js/dataTable.js' %}"}
     %script{type: "text/javascript", src: "{% static 'js/responsive-img.js' %}"}
-    
+
 
   -compress css
     %link{href: "{% static 'css/keyboard.css' %}", rel: "stylesheet"}
@@ -24,6 +21,7 @@
     %link{href: "{% static 'css/textAngular.css' %}", rel: "stylesheet"}
     -#%link{href: "{% static 'css/dataTable.css' %}", rel: "stylesheet"}
     %link{href: "{% static 'css/style.css' %}", rel: "stylesheet"}
+    %link{rel: "stylesheet", href: "{% static 'css/bootstrap-multiselect.css' %}"}
 
   %link{rel: "stylesheet", type: "text/css", href: "//fonts.googleapis.com/css?family=Open+Sans"}
   %link{href: "https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css", rel: "stylesheet"}
@@ -32,6 +30,9 @@
   %link{rel: "icon", type: "image/png", href: "{% static 'img/favicon.png' %}"}
 
   -block head
+-block bootstrap3_title
+  Oscar
+
 
 
 -block bootstrap3_content
@@ -113,6 +114,7 @@
     %script{type: "text/javascript", src: "{% static 'js/math_keyboard.js' %}"}
 
   %script{type: "text/javascript", src: "https://jsxgraph.uni-bayreuth.de/distrib/jsxgraphcore.js"}
+  %script{type: "text/javascript", src: "{% static 'js/bootstrap-multiselect.js' %}"}
 
   -compress js
     %script{type: "text/javascript", src: "{% static 'js/graph_base_functions.js' %}"}

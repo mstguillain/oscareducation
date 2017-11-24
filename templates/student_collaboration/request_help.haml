@@ -1,6 +1,8 @@
 -extends "student_collaboration/template.haml"
-
+-load static
 {% load widget_tweaks %}
+
+
 
 -block content-student
   {% if skill_form.list|length <= 0%}
@@ -8,8 +10,8 @@
     Vous n'avez pour l'instant aucune compétence nécessitant de l'aide
   {% else %}
 
-    .transparent-frame.center-block.col-lg-6
-      %p Vous pouvez demander de l'aide pour les compétences suivantes :
+    .transparent-frame.center-block.col-sm-8
+      %label Vous pouvez demander de l'aide pour les compétences suivantes :
 
       %form{method : "post"}
         {% csrf_token %}
@@ -19,4 +21,35 @@
               {%render_field field class="form-control" %}
         {% endfor %}
         %button.btn.btn-primary{type : "submit"} Send help request
+
   {% endif %}
+
+  :javascript
+    $(document).ready( function() {
+      $('#unmastered-skill-select').multiselect({
+        buttonWidth: '500px',
+        buttonText: function(options, select) {
+                if (options.length === 0) {
+                    return 'Pas de compétence(s) sélectionnée(s)...';
+                }
+                else if (options.length === 1) {
+                    return '1 compétence sélectionnée';
+                }
+                else if (options.length >= 2) {
+                    return options.length + ' compétences sélectionnées';
+                }
+                 else {
+                     var labels = [];
+                     options.each(function() {
+                         if ($(this).attr('label') !== undefined) {
+                             labels.push($(this).attr('label'));
+                         }
+                         else {
+                             labels.push($(this).html());
+                         }
+                     });
+                     return labels.join(', ') + '';
+                 }
+            }
+      });
+    });

@@ -40,7 +40,7 @@
               -else
                 %option{value : "skill"} Compétence
               -if sort == "state"
-                %option{value : "state", selected} Status
+                %option{value : "state", selected} Statut
               -else
                 %option{value : "state"} Status
           %input.btn.btn-primary{type : "submit", value : "Trier"}
@@ -76,7 +76,7 @@
       %label.col-sm-6 Ne montrer que les requêtes possédant la compétence :
       %div.col-sm-4
         %select.form-control{name : "filteredSkill", id : filteredSkillSelect}
-          %option{value : "all"} ----------------------------------------------------------------------------------
+          %option{value : "all"} ----------------------------------------------------------------------------------------------------------------------------------------
           {% for skill in skills %}
             {% if skill.id == filteredSkill|add:"0" %}
               %option{value : "{{skill.id}}", selected} {{ skill.name }}

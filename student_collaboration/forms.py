@@ -38,6 +38,7 @@ class UnmasteredSkillsForm(forms.Form):
         self.current_user = kwargs.pop('current_user', None)
         super(UnmasteredSkillsForm, self).__init__(*args, **kwargs)
         self.fields['list'] = forms.ModelMultipleChoiceField(queryset=qs, label="")
+        self.fields['list'].widget.attrs.update({'id' : 'unmastered-skill-select', 'multiple' : 'multiple'})
 
     # custom method to do validation
     # https://docs.djangoproject.com/fr/1.11/ref/forms/validation/#cleaning-a-specific-field-attribute

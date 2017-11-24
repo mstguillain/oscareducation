@@ -2,7 +2,7 @@
 
 -block content-student
 
-  {% if open_help_requests|length <= 0 %}
+  {% if open_help_requests|length > 0 %}
     %table#provide-help.table.table-bordered.table-hover
       %thead
         %tr
