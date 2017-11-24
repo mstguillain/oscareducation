@@ -531,10 +531,6 @@ def reply_thread(request, id):
     if form.is_valid():
         content = form.cleaned_data['content']
 
-        message = Message.objects.create(content=content, thread=thread, author=author,
-                                         created_date=utc.localize(datetime.now()), modified_date=utc.localize(datetime.now()))
-
-
         with transaction.atomic():
             message = Message.objects.create(content=content, thread=thread, author=author, created_date=utc.localize(datetime.now()), modified_date=utc.localize(datetime.now()))
 
