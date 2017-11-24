@@ -65,11 +65,11 @@ class Selenium:
 		""" All tests """
 		#self.testAdmin(ADMIN_PSEUDO, ADMIN_PASSWORD)
 
-		#self.testTeacherClassCreation(TEACHER_PSEUDO, TEACHER_PASSWORD, CLASS_NAME, STUDENTS, STUDENTS_SKILLS)
+		self.testTeacherClassCreation(TEACHER_PSEUDO, TEACHER_PASSWORD, CLASS_NAME, STUDENTS, STUDENTS_SKILLS)
 
-		#studentsPseudo = self.testRegisterStudents()
+		studentsPseudo = self.testRegisterStudents()
 
-		studentsPseudo = ["fnselen11.lnselen116", "fnselen22.lnselen226"] # TODO : delete
+		#studentsPseudo = ["fnselen11.lnselen116", "fnselen22.lnselen226"] # TODO : delete
 		self.testCollaborativeTool(studentsPseudo, STUDENTS_COLLABORATIVE_TOOLS_PARAMS)
 
 
@@ -113,7 +113,7 @@ class Selenium:
 		self.__testFunction(self.acceptHelpRequest)
 		self.logOutUser()
 
-		# TODO : créer la discussion etc etc.
+		# TODO : creer la discussion etc etc.
 
 	def __testFunction(self, fun, *args):
 		""" Test a given function on the given arguements"""
