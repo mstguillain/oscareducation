@@ -61,8 +61,6 @@
       $reply = $('#reply-btn')
       $editConfirm = $('#edit-confirm')
 
-      editInitialValue = $editTextarea.text()
-
 
       function disableButton($btn, disabled) {
         $btn.prop('disabled', disabled)
@@ -70,10 +68,10 @@
 
 
       disableButton($reply, $textarea.text().length == 0)
-      disableButton($editConfirm, true)
+      disableButton($editConfirm, false)
 
       $editTextarea.bind('input propertychange', function() {
-        disableButton($editConfirm, !this.value || this.value.length == 0 || this.value == editInitialValue)
+        disableButton($editConfirm, !this.value || this.value.length == 0)
       });
 
       $textarea.bind('input propertychange', function() {
