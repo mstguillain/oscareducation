@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 
 from datetime import datetime
 
+import os
 from django import forms
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
@@ -42,7 +43,6 @@ class MessageReplyForm(forms.ModelForm):
 
 def require_login(function):
     return login_required(function, login_url="/accounts/usernamelogin")
-
 
 @require_GET
 @require_login
@@ -526,19 +526,21 @@ def get_thread(request, id):
 def reply_thread(request, id):
     thread = get_object_or_404(Thread, pk=id)
     message_id = request.GET.get('reply_to')
-
-    form = MessageReplyForm(request.POST)  # request.Post contains the data we want
+    form = MessageReplyForm(request.POST, request.FILES)  # POST contains data, FILEs contains attachment
     author = User.objects.get(pk=request.user.id)
 
     if form.is_valid():
         content = form.cleaned_data['content']
-
+        file = form.cleaned_data['file']
         with transaction.atomic():
             message = Message.objects.create(content=content, thread=thread, author=author, created_date=utc.localize(datetime.now()), modified_date=utc.localize(datetime.now()))
 
             if message_id is not None:
                 parent_message = get_object_or_404(Message, pk=message_id)
                 message.parent_message = parent_message
+            if file is not None:
+                name = os.path.basename(file.name)
+                MessageAttachment.objects.create(name=name, file=file, message=message)
 
             message.save()
             thread.modified_date = message.created_date
@@ -639,11 +641,18 @@ def edit_message(request, id, message_id):
 
     if not can_update(thread, message, request.user):
         return HttpResponse(status=403, content="Permissions missing to edit this message")
-
+    
+    file = request.FILES.get('file')
     content = request.POST.get("content")
     if content is None or len(content) == 0:
         return HttpResponse(status=400, content="Missing content")
-
+    
+    if file is not None:
+        for attach in MessageAttachment.objects.filter(message_id=message_id):
+            attach.delete()
+        name = os.path.basename(file.name)
+        MessageAttachment.objects.create(name=name, file=file, message=message)
+         
     message.content = content
     message.save()
 
