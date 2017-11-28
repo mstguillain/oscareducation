@@ -73,11 +73,11 @@ class Selenium:
 		""" All tests """
 		#self.testAdmin(ADMIN_PSEUDO, ADMIN_PASSWORD)
 
-		#self.testTeacherClassCreation(TEACHER_PSEUDO, TEACHER_PASSWORD, CLASS_NAME, STUDENTS, STUDENTS_SKILLS)
+		self.testTeacherClassCreation(TEACHER_PSEUDO, TEACHER_PASSWORD, CLASS_NAME, STUDENTS, STUDENTS_SKILLS)
 
-		#studentsPseudo = self.testRegisterStudents()
+		studentsPseudo = self.testRegisterStudents()
 
-		studentsPseudo = ["fnselen11.lnselen116", "fnselen22.lnselen226"] # TODO : delete
+		#studentsPseudo = ["fnselen11.lnselen116", "fnselen22.lnselen226"] # TODO : delete
 		self.testCollaborativeTool(studentsPseudo, STUDENTS_COLLABORATIVE_TOOLS_PARAMS)
 
 
@@ -328,7 +328,7 @@ class Selenium:
 
 	def getStudentsCode(self):
 		""" We consider that we are on a lesson page """
-		self.getCurrentDriver().get("http://127.0.0.1:8000/professor/lesson/7/")# TODO : remove
+		#self.getCurrentDriver().get("http://127.0.0.1:8000/professor/lesson/7/")# TODO : remove
 		strDashbord = "professor/lesson/"
 		url = self.getCurrentDriver().current_url
 		professorDashbordURL = url[:url.find("/", url.find(strDashbord)+len(strDashbord))+1]
