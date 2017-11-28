@@ -39,6 +39,11 @@ STUDENTS_COLLABORATIVE_TOOLS_PARAMS = (
 	(1180, 7)
 )
 
+STUDENTS_FORUM_MESSAGES = (
+	"Hello world",
+	"Oh ! That's it, thx for the help bro!! :)"
+)
+
 
 class Selenium:
 	TIMEOUT_BUTTON_WAIT = 15
@@ -78,7 +83,7 @@ class Selenium:
 
 
 		#self.fakeTest()
-
+	# All tests parts #
 	def testAdmin(self, admin_pseudo, admin_password):
 		self.__testFunction(self.logInAdmin, admin_pseudo, admin_password)
 		self.__testFunction(self.logOutAdmin)
@@ -105,18 +110,29 @@ class Selenium:
 		self.__testFunction(self.activateCollaborativeTool, studentParams[0], studentParams[1])
 		# The first to connect ask for help
 		askRequestText = self.__testFunction(self.askHelp)
-		#print 'ask'+askRequestText
 
-		self.addDriver()
+
 		# With the second one we check that the help request exists
+		self.addDriver()
 		curIndex = 1 # We move to the second student
 		self.__testFunction(self.logInStudent, studentsPseudo[curIndex], STUDENTS_PASSWORD)
 		studentParams = students_collaborative_tools_params[curIndex]
 		self.__testFunction(self.activateCollaborativeTool, studentParams[0], studentParams[1])
 		self.__testFunction(self.acceptHelpRequest)
-		#self.logOutUser()
+		self.__testFunction(self.sendForumMessage, STUDENTS_FORUM_MESSAGES[0])
 
-		# TODO : creer la discussion etc etc.
+		# We go back to the first student who then reply to the other who accepted
+		curIndex = 0
+		self.setDriverIndex(curIndex)
+		# He is normally on the history view, we start by openning the
+		# We redirect him to his history (to refresh)
+		self.__testFunction(self.openFirstDiscussion)
+		self.__testFunction(self.sendForumMessage, STUDENTS_FORUM_MESSAGES[1])
+		# We step back to the collborative history and close the request
+		self.__testFunction(self.closeFirstHelpRequest)
+
+
+	# Other class logic #
 
 	def __testFunction(self, fun, *args):
 		""" Test a given function on the given arguements"""
@@ -182,6 +198,11 @@ class Selenium:
 	# Drivers stuff #
 
 	def getCurrentDriver(self):
+		"""
+
+		:return: The current webdriver being used
+		:rtype: WebDriver
+		"""
 		return self.drivers[self.driverIndex]
 
 	def addDriver(self):
@@ -421,13 +442,59 @@ class Selenium:
 
 		if self.__countRawsInTable(xPathTable) != sizeBeforeAcceptation-1:
 			raise BaseException(r"Table sized didn't decrement after request approval")
+
+		self.__testURL("student_collaboration/help_request_history/thread/[0-9]*",
+		               r"Student wasn't redireted to the forum thread page",
+		               r"Perhaps the implementation of the forum have changed or the Accept button wasn't clicked")
+
 		return skillText
+
+	def sendForumMessage(self, message):
+		""" Will automatically send messages in the forum
+			We consider that the a student is logged in & is on the page of a forum thread"""
+		textArea = self.__waitElementById("content")
+		textArea.send_keys(message)
+		textArea.submit()
+
+
+	def openFirstDiscussion(self):
+		""" Will open the first discussion on the currently logged in student
+			We consider that a student is logged in and that the first entry on his help request history table can open the conversation"""
+		self.getCurrentDriver().get(BASE_URL+"student_collaboration/help_request_history/")
+		self.__testURL("student_collaboration/help_request_history/", r"The help request history page was not shown", r"Are you logged in as a student with the collaborative tool enable ?")
+
+		xPathFirstOpenDiscussionLink = '//*[@id="history"]/tbody[2]/tr/td[3]/a'
+		self.__clickButtonByXPath(xPathFirstOpenDiscussionLink)
+		self.__testURL("student_collaboration/help_request_history/thread/[0-9]*",
+		               r"Student wasn't redireted to the forum thread page",
+		               r"Perhaps the implementation of the forum have changed")
+
+	def closeFirstHelpRequest(self):
+		""" Will close the first discussion on the currently logged in student
+			We consider that a student is logged in and that the first entry on his help request history table can close the conversation"""
+		self.getCurrentDriver().get(BASE_URL + "student_collaboration/help_request_history/")
+		self.__testURL("student_collaboration/help_request_history/", r"The help request history page was not shown",
+		               r"Are you logged in as a student with the collaborative tool enable ?")
+
+		xPathHistoryTable = '//*[@id="history"]'
+		pastRawsNumber = self.__countRawsInTable(xPathHistoryTable)
+
+		xPathFirstCloseButton = '//*[@id="history"]/tbody[2]/tr/td[4]/form/input[1]'
+		self.__clickButtonByXPath(xPathFirstCloseButton)
+
+		# We check that the entry dissapear of the history table
+		if pastRawsNumber != self.__countRawsInTable(xPathHistoryTable)+1:
+			print pastRawsNumber, self.__countRawsInTable(xPathHistoryTable)
+			raise BaseException(r'The number or raws in the history table have not changed after help closed',
+			                    r'Perhaps the help request was not closed ?')
 
 
 	def fakeTest(self):
 		""" ca c'est juste pour faire des petit test vite fait """
 		url = "http://127.0.0.1:8000/professor/lesson/4/student/1140/#heatmap"
 		self.getCurrentDriver().get(url)
+
+
 
 
 if __name__ == '__main__':
