@@ -4,7 +4,7 @@
 
 -block content-student
 
-  %form{ method : "post", class : "form-horizontal"}
+  %form#settings_form{ method : "post", class : "form-horizontal"}
     {% csrf_token %}
 
     {% for hidden_field in student_form.hidden_fields %}
@@ -41,9 +41,25 @@
           {{ settings_form.distance.errors }}
           {{ settings_form.distance }}
 
-    %div.form-group
-      %div.col-sm-offset-2.col-sm-10
-        %button{ type : "submit", class : "btn btn-primary"} Mettre à jour
+  -#Modal
+  %div#settings_modal
+    %div{class : "modal fade", id : "settingsModal", role : "dialog"}
+      %div.modal-dialog
+
+        -#Modal Content
+        %div.modal-content
+          %div.modal-header
+            %h4.modal-title
+          %div.modal-body
+            %p.center ! Attention !
+            %p.center Si vous désactivez l'outil de collaboration, toutes les demandes d'aide ouvertes seront fermées.
+          %div.modal-footer
+            %button#cancel_settings_submission{type : "button", class : "btn btn-success", data-dismiss : "modal"} Non, je garde l'outil activé
+            %a#submit_settings_button{type : "submit", class : "btn btn-danger"} Oui, je désactive l'outil
+
+  %div.col-sm-offset-2.col-sm-10
+    %button#modal_button{type : "submit", class : "btn btn-primary"} Mettre à jour
+
 
   :javascript
     $(document).ready( function() {
@@ -56,3 +72,36 @@
         $('.show-form').toggle(200);
        })
     });
+
+  -if collaborative_tool == true
+    :javascript
+      $(document).ready(function(){
+        $('#modal_button').on("click", function(){
+          $('#settings_form').submit();
+         })
+        $('#collaborative_tool_check').on("click", function(){
+          if($('#collaborative_tool_check')[0].checked === false){
+            $('#modal_button').attr("data-toggle", "modal");
+            $('#modal_button').attr("data-target", "#settingsModal");
+            $('#modal_button').unbind( "click" );
+            $('#submit_settings_button').on("click", function(){
+              $('#settings_form').submit();
+            })
+            $('#cancel_settings_submission').on("click", function(){
+              $("#collaborative_tool_check").prop('checked', true);
+              $('.show-form').toggle(200);
+              $('#modal_button').removeAttr("data-toggle");
+              $('#modal_button').removeAttr("data-target");
+              $('#modal_button').on("click", function(){
+                $('#settings_form').submit();
+              })
+            })
+          }else{
+            $('#modal_button').removeAttr("data-toggle");
+            $('#modal_button').removeAttr("data-target");
+            $('#modal_button').on("click", function(){
+              $('#settings_form').submit();
+            })
+          }
+        })
+      });

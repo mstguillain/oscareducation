@@ -24,8 +24,7 @@
             %td
           -else
             %td
-              %button{type:"button"}
-                %a{href : "{% url 'reply_help' help_request.id %}"} Accepter
+              %a{href : "{% url 'reply_help' help_request.id %}" ,class: "btn btn-primary"} Accepter
       {% endfor %}
     {% else %}
       %p.transparent-frame.col-md-5.center-block  Vous ne pouvez aider personne pour le moment.
