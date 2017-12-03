@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 
 from django.db import models
+from django.db.models import Q
 
 from forum.models import Thread
 from users.models import Student
@@ -211,3 +212,17 @@ class HelpRequest(models.Model):
             if helprequest_to_be_closed:
                 for closed in helprequest_to_be_closed.all():
                     closed.close_request(close_category=HelpRequest.HAS_OBTAINED_SKILLS)
+
+    """ Signal : When the student disables the collaborative tool """
+    @receiver(post_save, sender=StudentCollaborator)
+    def close_help_requests_when_flag_off(sender, instance, **kwargs):
+        if not instance.collaborative_tool:
+            helprequest_to_be_closed = HelpRequest.objects.filter(
+                Q(tutor=instance.user) | Q(student=instance.user)
+            ).exclude(
+                state=HelpRequest.CLOSED
+            )
+
+            if helprequest_to_be_closed:
+                for closed in helprequest_to_be_closed.all():
+                    closed.close_request(close_category=HelpRequest.CLOSED_BY_SYSTEM, comment=u"Système désactivé")
