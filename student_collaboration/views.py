@@ -69,6 +69,23 @@ def submit_help_request(request):
         list_skill_unmastered = list_skills_id  # student had no skill, no need to filter => empty query set
         has_a_skill = False
 
+    list_skill_unmastered_filtered_id = []
+    for skill in list_skill_unmastered.all():
+        # checks if the current user has exceed its MAX help request limit for a skill
+        count = HelpRequest.objects \
+            .filter(student__pk=request.user.student.pk, skill=skill) \
+            .exclude(state=HelpRequest.CLOSED) \
+            .distinct() \
+            .count()
+        if count < HelpRequest.MAX_HELP_REQUESTED_SKILL:
+            list_skill_unmastered_filtered_id.append(skill.id)
+    list_skill_unmastered = Skill.objects.filter(id__in=list_skill_unmastered_filtered_id)
+
+    too_many_request = False
+    nb_request = HelpRequest.objects.filter(student=request.user.student).exclude(state=HelpRequest.CLOSED).count()
+    if nb_request >= HelpRequest.MAX_HELP_REQUEST:
+        too_many_request = True
+
     if request.method == 'POST':
         skill_form = UnmasteredSkillsForm(request.POST, skills=list_skill_unmastered, current_user=request.user.student.pk)
         if skill_form.is_valid():  # All validation rules pass
@@ -78,7 +95,8 @@ def submit_help_request(request):
                 created_hr.skill.add(skill)
             return HttpResponseRedirect("/student_collaboration/help_request_history/")
     else:
-        skill_form = UnmasteredSkillsForm(skills=list_skill_unmastered, current_user=request.user.student.pk)
+        skill_form = UnmasteredSkillsForm(skills=list_skill_unmastered, current_user=request.user.student.pk,
+                                          too_many_requests=too_many_request)
 
     return render(request, "student_collaboration/request_help.haml", {
         'skill_form': skill_form,

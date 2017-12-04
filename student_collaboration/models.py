@@ -99,7 +99,8 @@ class StudentCollaborator(models.Model):
 
 class HelpRequest(models.Model):
     """ The LIMIT ; to prevent a mad user to add unlimited help requests """
-    MAX_HELP_REQUEST_BY_SKILLS = 3
+    MAX_HELP_REQUEST = 3
+    MAX_HELP_REQUESTED_SKILL = 2
     """ Constants : Help request statuses """
     CLOSED = "Closed"
     OPEN = "Open"
