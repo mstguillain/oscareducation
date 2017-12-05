@@ -1,11 +1,10 @@
 -extends "base.haml"
-{% load notifications_tags %}
 
 -block content
 
 
   .page-header
-    %h1 Student Collaboration - {{ user.username }}
+    %h1 Student Collaboration - {{ user.first_name }} {{user.last_name}}
 
   .container-fluid.boxclasseTitle
     -# TODO [Loan] Refactor avec un for, beaucoup de copier coller pour des comportements redondants

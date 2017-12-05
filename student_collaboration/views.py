@@ -10,7 +10,7 @@ from django.db.models import Q
 from django.urls import reverse
 
 from student_collaboration.models import StudentCollaborator, CollaborativeSettings, HelpRequest
-from users.models import Student
+from users.models import Student,User
 from skills.models import Skill
 from .forms import StudentCollaboratorForm, CollaborativeSettingsForm, UnmasteredSkillsForm, HelpRequestForm, SkillsForm
 from math import sin, cos, sqrt, atan2, radians
@@ -111,7 +111,8 @@ def open_help_request(request, id=None):
     if id:
         hp = HelpRequest.objects.filter(id=id).first()
         hp.reply_to_unanswered_help_request(request.user.student)
-        notify.send(sender=hp.tutor, recipient=hp.student, verb="L'utilisateur %s a accepté votre demande." % hp.tutor)
+        notify.send(sender=hp.tutor, recipient=User.objects.filter(student=hp.student).first(),
+                    verb="L'utilisateur %s a accepté votre demande." % hp.tutor)
         return HttpResponseRedirect('/student_collaboration/help_request_history/thread/' + str(hp.thread.pk))
 
     """ We redirect to the list view """

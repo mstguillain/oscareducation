@@ -3,7 +3,8 @@ from __future__ import unicode_literals
 from django.core.management.base import BaseCommand
 from student_collaboration.models import HelpRequest
 from datetime import datetime, timedelta
-
+from notifications.signals import notify
+from users.models import User
 """ CONSTANTS FOR THE TIMER """
 # Can be changed  (by default 1 week)
 WEEKS_BEFORE_PENDING = 0
@@ -43,6 +44,7 @@ class Command(BaseCommand):
             self.stdout.write("FOUND %s Help request(s) => PENDING" % request_list.count())
             for help_request in request_list.all():
                 try:
+                    notify.send(sender=help_request, recipient=User.objects.filter(student=help_request.student).first(), verb="Une de vos requêtes a expiré, consultez votre historique !" )
                     help_request.change_state(HelpRequest.PENDING)
                 except:
                     self.stderr.write(self.style.WARNING(u"Problem with HR n° %s" % help_request.pk))
