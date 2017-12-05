@@ -16,6 +16,7 @@ from .forms import StudentCollaboratorForm, CollaborativeSettingsForm, Unmastere
 from math import sin, cos, sqrt, atan2, radians
 from decorators import user_has_collaborative_tool_active
 
+from notifications.signals import notify
 
 # Create your views here.
 @login_required
@@ -110,6 +111,7 @@ def open_help_request(request, id=None):
     if id:
         hp = HelpRequest.objects.filter(id=id).first()
         hp.reply_to_unanswered_help_request(request.user.student)
+        notify.send(sender=hp.tutor, recipient=hp.student, verb="L'utilisateur %s a accepté votre demande." % hp.tutor)
         return HttpResponseRedirect('/student_collaboration/help_request_history/thread/' + str(hp.thread.pk))
 
     """ We redirect to the list view """

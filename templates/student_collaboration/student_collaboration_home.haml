@@ -1,4 +1,5 @@
 -extends "student_collaboration/template.haml"
+{% load notifications_tags %}
 
 -block content-student
   - if not user.student.studentcollaborator.collaborative_tool
@@ -9,3 +10,10 @@
     .transparent-frame.col-md-5.center-block
       %p Le module de collaboration est activé
 
+  {% url 'notifications' as url %}
+  {% live_notify_list %}
+  {% live_notify_badge %}
+  {% notifications_unread as unread_count %}
+  {% if unread_count %}
+    Vous avez <strong>{{ unread_count }}</strong> notification(s) non lue(s).
+  {% endif %}
