@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.checks import messages
 from django.shortcuts import render, get_object_or_404, redirect, render_to_response
 from django.http import HttpResponseRedirect
+from django.template.defaulttags import register
 from django.utils.decorators import method_decorator
 from django.views.generic import ListView
 from django.db.models import Q
@@ -129,9 +130,11 @@ def collaborative_home(request):
 def help_request_hist(request):
     if request.GET.get('id',None):
         hp = HelpRequest.objects.filter(id=request.GET.get('id',None)).first()
-        if hp:
+        reason = request.GET.get('closeReason')
+        print reason
+        if hp and reason != 'None':
             if hp.student == request.user.student or hp.tutor == request.user.student:
-                hp.close_request(None, None)
+                hp.close_request(None, reason)
     return HelpRequestHistory.as_view()(request)
 
 
@@ -245,3 +248,8 @@ def extend_help_request(request):
             if hp.student == request.user.student:
                 hp.extend_request()
     return HelpRequestHistory.as_view()(request)
+
+
+@register.filter
+def get_item(dictionary, key):
+    return dictionary.items.key

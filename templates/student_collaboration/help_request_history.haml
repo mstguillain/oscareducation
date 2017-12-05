@@ -113,25 +113,77 @@
             %td Pas de discussion en cours
         -elif help_request.state == "Closed"
           %td
-            Cloturée
+            %p Cloturée:
+            {% for reasonKey, reasonValue in closeReasons %}
+              -if help_request.closedReason == reasonKey
+                %p {{reasonValue}}
+            {% endfor %}
         -elif help_request.state == "Pending"
           %td
             %form{action : "{% url 'extend_help_request' %}", method : "GET"}
               %input.btn.btn-success{type:"submit", value: "Prolonger"}
               %input{type:"hidden", name:"id" ,value: "{{help_request.id}}"}
-            %br
-            %form{action : "{% url 'help_request_history' %}", method : "GET"}
-              %input.btn.btn-danger{type:"submit", value: "Clôturer"}
-              %input{type:"hidden", name:"id" ,value: "{{help_request.id}}"}
+            -#%br
+            -#%form{action : "{% url 'help_request_history' %}", method : "GET"}
+            -#  %input.btn.btn-danger{type:"submit", value: "Clôturer"}
+            -#  %input{type:"hidden", name:"id" ,value: "{{help_request.id}}"}
         -else
           %td En attente d'acceptation
         %td
           -if help_request.state != "Closed"
-            %form{action : "{% url 'help_request_history' %}", method : "GET"}
-              %input.btn.btn-sm{type:"submit", value: "Clôturer"}
-              %input{type:"hidden", name:"id" ,value: "{{help_request.id}}"}
-              %input{type:"hidden", name:"requests" ,value: "{{currentStatus}}"}
-              %input{type:"hidden", name:"showClosed" ,value: "{{showClosed}}"}
-              %input{type:"hidden", name:"sort",value: "{{sort}}"}
+            -#%form#close_form{action : "{% url 'help_request_history' %}", method : "GET"}
+            %a.btn.btn-danger#modal_close_button{type:"submit", data-toggle: "modal", data-target: "#closeModal", data-hr-id: "{{help_request.id}}", data-current-status: "{{currentStatus}}", data-show-closed: "{{showClosed}}", data-sort: "{{sort}}"} Clôturer
+              -#%input{type:"hidden", name:"id" ,value: "{{help_request.id}}"}
+              -#%input{type:"hidden", name:"requests" ,value: "{{currentStatus}}"}
+              -#%input{type:"hidden", name:"showClosed" ,value: "{{showClosed}}"}
+              -#%input{type:"hidden", name:"sort",value: "{{sort}}"}
     {% endfor %}
   {% endif %}
+
+  -#Modal
+  %div
+    %div{class : "modal fade", id : "closeModal", role : "dialog"}
+      %div.modal-dialog
+
+        -#Modal Content
+        %div.modal-content
+          %div.modal-header
+            %h4.modal-title
+          %div.modal-body
+            %p.center Veux-tu réellement clôturer cette demande d'aide ?
+            %p.center Si oui, sélectionne la raison pour laquelle tu souhaites la clôturer:
+          %div.modal-footer
+            %form#close_form{action : "{% url 'help_request_history' %}", method : "GET"}
+              %select.form-control{name : "closeReason", id : closeReasonSelect}
+                %option{value : "None"} Aucune raison sélectionnée
+                {% for reasonKey, reasonValue in closeReasons %}
+                  %option{value:"{{reasonKey}}"} {{reasonValue}}
+                {% endfor %}
+              %br
+              %button#cancel_close_submission{type : "button", class : "btn btn-success", data-dismiss : "modal"} Annuler
+              %a#submit_close_button{type : "submit", class : "btn btn-danger"} Clôturer
+              %input{type:"hidden", name:"id", value: ""}
+              %input{type:"hidden", name:"requests", value: ""}
+              %input{type:"hidden", name:"showClosed", value: ""}
+              %input{type:"hidden", name:"sort", value: ""}
+
+
+  :javascript
+      $(document).ready(function(){
+        $('#closeModal').on('show.bs.modal', function (event) {
+          var button = $(event.relatedTarget);
+          var hr_id = button.data('hr-id');
+          var current_status = button.data('current-status');
+          var show_closed = button.data('show-closed');
+          var sort = button.data('sort');
+          var modal = $(this);
+          modal.find('[name=id]').val(hr_id);
+          modal.find('[name=requests]').val(current_status);
+          modal.find('[name=showClosed]').val(show_closed);
+          modal.find('[name=sort]').val(sort);
+        });
+
+        $('#submit_close_button').on("click", function(){
+          $('#close_form').submit();
+        })
+      });
