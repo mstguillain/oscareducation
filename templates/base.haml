@@ -55,6 +55,7 @@
             -else
               %a.brand.navbar-brand{href: "{% url 'student_dashboard' %}"}
               %a.icon.navbar-collab{href: "{% url 'collaborative_home' %}", title: "Collaborative Tool"}
+              {% live_notify_badge classes="badge notifications-badge-class" %}
                 -#%img{src: "{% static 'img/icons/collaborative.png' %}"}
 
 
@@ -120,6 +121,8 @@
     %script{type: "text/javascript", src: "{% static 'js/textAngular-sanitize.min.js' %}"}
     %script{type: "text/javascript", src: "{% static 'js/textAngular.min.js' %}"}
     %script{type: "text/javascript", src: "{% static 'js/math_keyboard.js' %}"}
+    %script{type: "text/javascript", src: "{% static 'js/moment.min.js' %}"}
+    %script{type: "text/javascript", src: "{% static 'js/moment-timezone-with-data.min.js' %}"}
 
   %script{type: "text/javascript", src: "https://jsxgraph.uni-bayreuth.de/distrib/jsxgraphcore.js"}
   %script{type: "text/javascript", src: "{% static 'js/bootstrap-multiselect.js' %}"}
