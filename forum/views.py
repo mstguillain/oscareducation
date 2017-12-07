@@ -622,13 +622,17 @@ def can_update(thread, message, user):
     if thread.is_private():
         return message.author.id == user.id
     elif thread.is_public_professor():
-        professor = Professor.objects.filter(user=user)
-        return message.author.id == user.id or (professor is not None and thread.professor.id == professor.id)
+        if Professor.objects.filter(user=user).exists():
+            professor = Professor.objects.get(user=user)
+            return message.author.id == user.id or professor.id == thread.professor.id
+        else:
+            return message.author.id == user.id
     elif thread.is_public_lesson():
-        professors = thread.lesson.professors.all()
-        professor = Professor.objects.filter(user=user)
+
         condition = message.author.id == user.id
-        if professor is not None:
+        if Professor.objects.filter(user=user).exists():
+            professors = thread.lesson.professors.all()
+            professor = Professor.objects.get(user=user)
             return condition or professor in professors
         else:
             return condition
@@ -655,7 +659,7 @@ def edit_message(request, id, message_id):
             attach.delete()
         name = os.path.split(file.name)[1]
         MessageAttachment.objects.create(name=name, file=file, message=message)
-
+    message.modified_date = utc.localize(datetime.now())
     message.content = content
     message.save()
 
@@ -679,5 +683,10 @@ def delete_message(request, id, message_id):
         attach.delete()
 
     message.delete()
+
+    thread = get_object_or_404(Thread, pk=id)
+    if len(thread.message_set.all()) == 0:
+        thread.delete()
+        return redirect('/forum')
 
     return redirect(thread)
