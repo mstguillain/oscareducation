@@ -62,8 +62,9 @@ INSTALLED_APPS = (
     'resources',
     'end_test_poll',
     'student_collaboration',
-    'forum'
-
+    'forum',
+    'widget_tweaks',
+    'notifications'
 ) + ADDITIONAL_APPS
 
 MIDDLEWARE = (
@@ -134,6 +135,10 @@ LOGGING = {
             'handlers': ['console'],
             'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
         },
+        'django_crontab': {
+            'handlers': ['console'],
+            'level': 'INFO',
+        }
     },
 }
 
@@ -203,6 +208,6 @@ EMAIL_USE_TLS = True
 
 """ Cron tasks """
 CRONJOBS = [
-    ('*/5 * * * *', 'student_collaboration.cron.set_open_help_request_to_pending'),
-    ('*/5 * * * *', 'student_collaboration.cron.close_pending_help_requests_automatically_when_expired'),
+    ('* * * * *', 'django.core.management.call_command', ['close_pending_help_requests']),
+    ('* * * * *', 'django.core.management.call_command', ['set_help_requests_to_pending']),
 ]

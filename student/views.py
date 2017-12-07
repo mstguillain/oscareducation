@@ -18,7 +18,8 @@ from skills.models import StudentSkill, Skill, Section, CodeR, Relations, CodeR_
 from end_test_poll.models import StudentPoll
 from end_test_poll.forms import StudentPollForm
 from resources.models import KhanAcademy, Sesamath, Resource
-
+from student_collaboration.models import StudentCollaborator
+from users.models import Student
 
 from utils import user_is_student
 
@@ -62,9 +63,16 @@ def pass_test(request, pk):
             print pool_form.errors
     irint(lesson_resource_khanacademy)
         """
+
+        real_student = test_student.student
+        student_collaborator = StudentCollaborator.objects.filter(
+            user=real_student
+        ).first()
+
         return render(request, "examinations/test_finished.haml", {
             "test_student": test_student,
             "pool_form": pool_form,
+            "collaborative_tool": student_collaborator.collaborative_tool
         })
 
     # the order_by here is used to make the order of the exercices deterministics
@@ -85,8 +93,14 @@ def pass_test(request, pk):
         #if not StudentPoll.objects.filter(student=test_student.student).exists():
         #    pool_form = StudentPollForm()
 
+        real_student = test_student.student
+        student_collaborator = StudentCollaborator.objects.filter(
+            user=real_student
+        ).first()
+
         return render(request, "examinations/test_finished.haml", {
             "test_student": test_student,
+            "collaborative_tool": student_collaborator.collaborative_tool
             #"pool_form": pool_form,
         })
 

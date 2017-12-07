@@ -1,28 +1,31 @@
--extends "base.haml"
+-extends "student_collaboration/template.haml"
 
--block content
-  %table
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Skill</th>
-        <th>Date</th>
-        <th></th>
-      </tr>
-    </thead>
-    <tbody>
-    {% for help_request in open_help_requests %}
-      <tr>
-        <td>{{ help_request.student }}</td>
-        <td>
-          <ul>
-          {% for skill in help_request.skill.all %}
-            <li>{{ skill }}</li>
-          {% endfor %}
-          </ul>
-        </td>
-        <td>{{ help_request.timestamp }} </td>
-        <td><a href= "{% url 'reply_help' help_request.id %}">"Accepter"</a> </td>
-      </tr>
-    {% endfor %}
-    </tbody>
+-block content-student
+
+  {% if open_help_requests|length > 0 %}
+    %table#provide-help.table.table-bordered.table-hover
+      %thead
+        %tr
+          %th Name
+          %th Skill
+          %th Date
+          %th
+      %tbody
+      {% for help_request in open_help_requests %}
+        %tr
+          %td {{ help_request.student }}
+          %td
+            %ul
+            {% for skill in help_request.skill.all %}
+              %li {{ skill }}
+            {% endfor %}
+          %td {{ help_request.timestamp }}
+          -if help_request.student.studentcollaborator.pk == currentUserPk
+            %td
+          -else
+            %td
+              %a{href : "{% url 'reply_help' help_request.id %}" ,class: "btn btn-primary"} Accepter
+      {% endfor %}
+    {% else %}
+      %p.transparent-frame.col-md-5.center-block  Vous ne pouvez aider personne pour le moment.
+    {% endif %}

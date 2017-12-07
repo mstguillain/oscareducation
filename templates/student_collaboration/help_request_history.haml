@@ -1,0 +1,189 @@
+-extends "student_collaboration/template.haml"
+
+-block content-student
+
+  %div#filter-history-IO
+    %form.form-horizontal{action : "{% url 'help_request_history' %}", method : "GET"}
+      %div.form-group.col-sm-6
+        %label.col-xs-3.control-label.text-left Afficher :
+        %div.col-xs-5
+          %select.form-control{name : "requestType", id : "test"}
+            -if requestType == "all"
+              %option{value : "all", selected} Tout
+            -else
+              %option{value : "all"} Tout
+            -if requestType == "requested"
+              %option{value : "requested", selected} Aide demandée
+            -else
+              %option{value : "requested"} Aide demandée
+            -if requestType == "provided"
+              %option{value : "provided", selected} Aide fournie
+            -else
+              %option{value : "provided"} Aide fournie
+        %input.btn.btn-primary{type : "submit", value : "Filtrer"}
+        %input{type:"hidden", name:"showClosed" ,value: "{{showClosed}}"}
+        %input{type:"hidden", name:"sort",value: "{{sort}}"}
+    -#%br
+
+    %div#sort-history-IO
+      %form.form-horizontal{action : "{% url 'help_request_history' %}", method : "GET"}
+        %div.form-group
+          %label.col-sm-2.control-label.text-left Trier par :
+          %div.col-sm-2
+            %select.form-control{name : "sort", id : "test2"}
+              -if sort == "timestamp"
+                %option{value : "timestamp", selected} Date
+              -else
+                %option{value : "timestamp"} Date
+              -if sort == "state"
+                %option{value : "state", selected} Statut
+              -else
+                %option{value : "state"} Statut
+          %input.btn.btn-primary{type : "submit", value : "Trier"}
+          %input{type:"hidden", name:"showClosed" ,value: "{{showClosed}}"}
+          %input{type:"hidden", name:"requests" ,value: "{{currentStatus}}"}
+    -#%br
+
+    %div#closed-history-IO.col-sm-12
+      %form.form-horizontal{action : "{% url 'help_request_history' %}", method : "GET"}
+        %div.form-group
+          %label.col-sm-4.control-label.text-left  Afficher les requêtes clôturées :
+          -if showClosed == "1"
+            %div.col-sm-1
+              %label.switch
+                %input.form-control{type : "checkbox", name : "Cacher les requêtes clôturées", onChange : "this.form.submit()", checked, id : "show_closed_checkbox"}
+                %span.slider.round
+              %input{type:"hidden", name:"requests" ,value: "{{currentStatus}}"}
+              %input{type:"hidden", name:"showClosed" ,value: "0"}
+              %input{type:"hidden", name:"sort",value: "{{sort}}"}
+          -else
+            %div.col-sm-1
+              %label.switch
+                %input.form-control{type : "checkbox", name : "Montrer les requêtes clôturées", onChange : "this.form.submit()", id : "show_closed_checkbox"}
+                %span.slider.round
+              %input{type:"hidden", name:"requests" ,value: "{{currentStatus}}"}
+              %input{type:"hidden", name:"showClosed" ,value: "1"}
+              %input{type:"hidden", name:"sort",value: "{{sort}}"}
+
+    -#%br
+
+  %div#sortbyskill-history-IO
+    %form{action : "{% url 'help_request_history' %}", method : "GET"}
+      %label.col-sm-6 Ne montrer que les requêtes possédant la compétence :
+      %div.col-sm-4
+        %select.form-control{name : "filteredSkill", id : filteredSkillSelect}
+          %option{value : "all"} ----------------------------------------------------------------------------------------------------------------------------------------
+          {% for skill in skills %}
+            {% if skill.id == filteredSkill|add:"0" %}
+              %option{value : "{{skill.id}}", selected} {{ skill.name }}
+            {% else %}
+              %option{value : "{{skill.id}}"} {{ skill.name }}
+            {% endif %}
+          {% endfor %}
+      %input.btn.btn-primary{type : "submit", value : "Filtrer"}
+      %input{type:"hidden", name:"showClosed" ,value: "{{showClosed}}"}
+      %input{type:"hidden", name:"requests" ,value: "{{currentStatus}}"}
+      %input{type:"hidden", name:"sort",value: "{{sort}}"}
+    %br
+  {% if open_help_requests|length <= 0 %}
+    %p.transparent-frame.col-md-6.center-block Votre historique est vide. Essayez de changer les filtres.
+  {% else %}
+  %table#history.table.table-bordered
+    %thead
+      %tr
+        %th Compétence(s)
+        %th Date
+        %th Discussion
+        %th Clôturer
+    %tbody
+    {% for help_request in open_help_requests %}
+      %tr
+        %td
+          %ul
+          {% for skill in help_request.skill.all %}
+            %li {{ skill }}
+          {% endfor %}
+        %td {{ help_request.timestamp }}
+        -if help_request.state  == "Accepted"
+          -if help_request.thread
+            %td
+              %a.list-group-item{href: "{% url 'view_thread' help_request.thread.pk %}"}
+                .a.text-primary.hover Ouvrir discussion
+          -else
+            %td Pas de discussion en cours
+        -elif help_request.state == "Closed"
+          %td
+            %p Cloturée:
+            {% for reasonKey, reasonValue in closeReasons %}
+              -if help_request.closedReason == reasonKey
+                %p {{reasonValue}}
+            {% endfor %}
+        -elif help_request.state == "Pending"
+          %td
+            %form{action : "{% url 'extend_help_request' %}", method : "GET"}
+              %input.btn.btn-success{type:"submit", value: "Prolonger"}
+              %input{type:"hidden", name:"id" ,value: "{{help_request.id}}"}
+            -#%br
+            -#%form{action : "{% url 'help_request_history' %}", method : "GET"}
+            -#  %input.btn.btn-danger{type:"submit", value: "Clôturer"}
+            -#  %input{type:"hidden", name:"id" ,value: "{{help_request.id}}"}
+        -else
+          %td En attente d'acceptation
+        %td
+          -if help_request.state != "Closed"
+            -#%form#close_form{action : "{% url 'help_request_history' %}", method : "GET"}
+            %a.btn.btn-danger#modal_close_button{type:"submit", data-toggle: "modal", data-target: "#closeModal", data-hr-id: "{{help_request.id}}", data-current-status: "{{currentStatus}}", data-show-closed: "{{showClosed}}", data-sort: "{{sort}}"} Clôturer
+              -#%input{type:"hidden", name:"id" ,value: "{{help_request.id}}"}
+              -#%input{type:"hidden", name:"requests" ,value: "{{currentStatus}}"}
+              -#%input{type:"hidden", name:"showClosed" ,value: "{{showClosed}}"}
+              -#%input{type:"hidden", name:"sort",value: "{{sort}}"}
+    {% endfor %}
+  {% endif %}
+
+  -#Modal
+  %div
+    %div{class : "modal fade", id : "closeModal", role : "dialog"}
+      %div.modal-dialog
+
+        -#Modal Content
+        %div.modal-content
+          %div.modal-header
+            %h4.modal-title
+          %div.modal-body
+            %p.center Veux-tu réellement clôturer cette demande d'aide ?
+            %p.center Si oui, sélectionne la raison pour laquelle tu souhaites la clôturer:
+          %div.modal-footer
+            %form#close_form{action : "{% url 'help_request_history' %}", method : "GET"}
+              %select.form-control{name : "closeReason", id : closeReasonSelect}
+                %option{value : "None"} Aucune raison sélectionnée
+                {% for reasonKey, reasonValue in closeReasons %}
+                  %option{value:"{{reasonKey}}"} {{reasonValue}}
+                {% endfor %}
+              %br
+              %button#cancel_close_submission{type : "button", class : "btn btn-success", data-dismiss : "modal"} Annuler
+              %a#submit_close_button{type : "submit", class : "btn btn-danger"} Clôturer
+              %input{type:"hidden", name:"id", value: ""}
+              %input{type:"hidden", name:"requests", value: ""}
+              %input{type:"hidden", name:"showClosed", value: ""}
+              %input{type:"hidden", name:"sort", value: ""}
+
+
+  :javascript
+      $(document).ready(function(){
+        $('#closeModal').on('show.bs.modal', function (event) {
+          var button = $(event.relatedTarget);
+          var hr_id = button.data('hr-id');
+          var current_status = button.data('current-status');
+          var show_closed = button.data('show-closed');
+          var sort = button.data('sort');
+          var modal = $(this);
+          modal.find('[name=id]').val(hr_id);
+          modal.find('[name=requests]').val(current_status);
+          modal.find('[name=showClosed]').val(show_closed);
+          modal.find('[name=sort]').val(sort);
+        });
+
+        $('#submit_close_button').on("click", function(){
+          $('#close_form').submit();
+        })
+      });

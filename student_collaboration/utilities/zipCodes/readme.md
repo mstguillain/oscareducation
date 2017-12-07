@@ -1,5 +1,11 @@
 ## Utilities ~ zip code position generation
 
+### If the postal code entries in empty in the collaborative tool simply add the `zipcodes.sql` to the database ! 
+
+
+
+### zipCodes Generator:
+
 Based on all existing Belgian zip code we find -  using Google Map API - it's geographical position in order to after evaluate distance between 2 users.
 
 The source code is still here in case change happens (either in the country, in the API we use, etc.)

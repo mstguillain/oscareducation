@@ -18,6 +18,9 @@ import mechanize
 import yamlordereddictloader
 import pandas as pd
 
+# the custom signal to fix the no signal send with _set.add
+from .signals import student_added_to_lesson
+
 from ruamel.yaml.comments import CommentedMap
 
 from base64 import b64decode
@@ -231,6 +234,8 @@ def lesson_student_add(request, pk):
                                                         last_name=last_name)
                         student = Student.objects.create(user=user)
                         student.lesson_set.add(lesson)
+                        # send signal to tell a student was added to a lesson ; default signal not working
+                        student_added_to_lesson.send(sender=Lesson, student=student, level=lesson.stage.level)
 
                         for stage in lesson.stages_in_unchronological_order():
                             for skill in stage.skills.all():
@@ -281,6 +286,8 @@ def lesson_student_add(request, pk):
 
                     student = Student.objects.create(user=user)
                     student.lesson_set.add(lesson)
+                    # send signal to tell a student was added to a lesson ; default signal not working
+                    student_added_to_lesson.send(sender=Lesson, student=student, level=lesson.stage.level)
 
                     for stage in lesson.stages_in_unchronological_order():
                         for skill in stage.skills.all():

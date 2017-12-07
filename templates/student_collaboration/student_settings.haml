@@ -1,10 +1,107 @@
--extends "base.haml"
+-extends "student_collaboration/template.haml"
 
--block content
+{% load widget_tweaks %}
 
-  <form method="post">
+-block content-student
+
+  %form#settings_form{ method : "post", class : "form-horizontal"}
     {% csrf_token %}
-    {{ student_form.as_p }}
-    {{ settings_form.as_p }}
-    <button type="submit">Save changes</button>
-  </form>
+
+    {% for hidden_field in student_form.hidden_fields %}
+      {{ hidden_field}}
+    {% endfor %}
+
+    {% for hidden_field in settings_form.hidden_fields %}
+      {{ hidden_field}}
+    {% endfor %}
+
+
+    %div.form-group
+      %label.col-sm-2.control-label
+        {{ student_form.collaborative_tool.label_tag }}
+
+      {{ student_form.collaborative_tool.errors }}
+      %div.col-sm-1
+        %label.switch
+          {{ student_form.collaborative_tool }}
+          %span.slider.round
+
+    %div.show-form
+      %div.form-group
+        %label.col-sm-2.control-label
+          {{ student_form.postal_code.label_tag }}
+        %div.col-xs-2
+          {{ student_form.postal_code.errors }}
+          {{ student_form.postal_code }}
+
+      %div.form-group
+        %label.col-sm-2.control-label
+          {{ settings_form.distance.label_tag }}
+        %div.col-xs-2
+          {{ settings_form.distance.errors }}
+          {{ settings_form.distance }}
+
+  -#Modal
+  %div
+    %div{class : "modal fade", id : "settingsModal", role : "dialog"}
+      %div.modal-dialog
+
+        -#Modal Content
+        %div.modal-content
+          %div.modal-header
+            %h4.modal-title
+          %div.modal-body
+            %p.center ! Attention !
+            %p.center Si vous désactivez l'outil de collaboration, toutes les demandes d'aide ouvertes seront fermées.
+          %div.modal-footer
+            %button#cancel_settings_submission{type : "button", class : "btn btn-success", data-dismiss : "modal"} Non, je garde l'outil activé
+            %a#submit_settings_button{type : "submit", class : "btn btn-danger"} Oui, je désactive l'outil
+
+  %div.col-sm-offset-2.col-sm-10
+    %button#modal_button{type : "submit", class : "btn btn-primary"} Mettre à jour
+
+
+  :javascript
+    $(document).ready( function() {
+      console.log($("#collaborative_tool_check")[0].checked);
+      if($("#collaborative_tool_check")[0].checked === false){
+        $('.show-form').hide();
+      }
+
+      $("#collaborative_tool_check").on("click", function() {
+        $('.show-form').toggle(200);
+       })
+    });
+
+  -if collaborative_tool == true
+    :javascript
+      $(document).ready(function(){
+        $('#modal_button').on("click", function(){
+          $('#settings_form').submit();
+         })
+        $('#collaborative_tool_check').on("click", function(){
+          if($('#collaborative_tool_check')[0].checked === false){
+            $('#modal_button').attr("data-toggle", "modal");
+            $('#modal_button').attr("data-target", "#settingsModal");
+            $('#modal_button').unbind( "click" );
+            $('#submit_settings_button').on("click", function(){
+              $('#settings_form').submit();
+            })
+            $('#cancel_settings_submission').on("click", function(){
+              $("#collaborative_tool_check").prop('checked', true);
+              $('.show-form').toggle(200);
+              $('#modal_button').removeAttr("data-toggle");
+              $('#modal_button').removeAttr("data-target");
+              $('#modal_button').on("click", function(){
+                $('#settings_form').submit();
+              })
+            })
+          }else{
+            $('#modal_button').removeAttr("data-toggle");
+            $('#modal_button').removeAttr("data-target");
+            $('#modal_button').on("click", function(){
+              $('#settings_form').submit();
+            })
+          }
+        })
+      });

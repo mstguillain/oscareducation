@@ -1,9 +1,8 @@
 -extends "bootstrap3/bootstrap3.html"
 -load static
 -load compress
+{% load notifications_tags %}
 
--block bootstrap3_title
-  Oscar
 
 -block bootstrap3_extra_head
   %script{type: "text/javascript", async: None, src: "//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-MML-AM_CHTML"}
@@ -14,7 +13,7 @@
     %script{type: "text/javascript", src: "{% static 'js/angular-cookies.js' %}"}
     -#%script{type: "text/javascript", src: "{% static 'js/dataTable.js' %}"}
     %script{type: "text/javascript", src: "{% static 'js/responsive-img.js' %}"}
-    
+
 
   -compress css
     %link{href: "{% static 'css/keyboard.css' %}", rel: "stylesheet"}
@@ -24,6 +23,8 @@
     %link{href: "{% static 'css/textAngular.css' %}", rel: "stylesheet"}
     -#%link{href: "{% static 'css/dataTable.css' %}", rel: "stylesheet"}
     %link{href: "{% static 'css/style.css' %}", rel: "stylesheet"}
+    %link{rel: "stylesheet", href: "{% static 'css/bootstrap-multiselect.css' %}"}
+
 
   %link{rel: "stylesheet", type: "text/css", href: "//fonts.googleapis.com/css?family=Open+Sans"}
   %link{href: "https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css", rel: "stylesheet"}
@@ -33,6 +34,8 @@
 
   -block head
 
+-block bootstrap3_title
+  Oscar
 
 -block bootstrap3_content
   %div{class: "{% if user.professor %}fond{% endif %}"}
@@ -40,6 +43,7 @@
       .navbar-inner
         .container
           .navbar-header
+
             %button.hidden-md.hidden-lg{type: "button", class: "navbar-toggle collapsed", data-toggle: "collapse", data-target: "#toCollapse"}
               %span.sr-only Toggle navigation
               %span.icon-bar
@@ -50,8 +54,11 @@
                 <span style="color: #F58025">O</span>scar
             -else
               %a.brand.navbar-brand{href: "{% url 'student_dashboard' %}"}
-              %a.brand.navbar-collab{href: "{% url 'collaborative_home' %}"}
+              %a.icon.navbar-collab{href: "{% url 'collaborative_home' %}", title: "Collaborative Tool"}
+              {% live_notify_badge classes="badge notifications-badge-class" %}
                 -#%img{src: "{% static 'img/icons/collaborative.png' %}"}
+
+
             -if user.professor and not no_menu
               .nav-global-shortcuts
                 %a.global-shortcut.home{href: "{% url 'professor:dashboard' %}", data-toggle: "tooltip", data-placement: "bottom", title: "Page d´accueil"}
@@ -66,9 +73,6 @@
                 -#%img{src: "{% static 'img/icons/logout.png' %}"}
           #toCollapse.collapse.navbar-collapse
             %ul.nav.navbar-nav.hidden-md.hidden-lg
-              %li
-                %a.icon.settings{href: "{% url 'settings' %} "}
-                  -#%img{src: "{%static 'img/icons/settings.png' %}"}
               %li
                 %a.icon.logout{href: "{% url 'logout' %}"}
                   -# %img{src: "{% static 'img/icons/logout.png' %}"}
@@ -103,6 +107,9 @@
       }
 
 
+
+
+
 -block bootstrap3_extra_script
   -compress js
     %script{type: "text/javascript", src: "{% static 'js/base.js' %}"}
@@ -114,10 +121,16 @@
     %script{type: "text/javascript", src: "{% static 'js/textAngular-sanitize.min.js' %}"}
     %script{type: "text/javascript", src: "{% static 'js/textAngular.min.js' %}"}
     %script{type: "text/javascript", src: "{% static 'js/math_keyboard.js' %}"}
+    %script{type: "text/javascript", src: "{% static 'js/moment.min.js' %}"}
+    %script{type: "text/javascript", src: "{% static 'js/moment-timezone-with-data.min.js' %}"}
 
   %script{type: "text/javascript", src: "https://jsxgraph.uni-bayreuth.de/distrib/jsxgraphcore.js"}
+  %script{type: "text/javascript", src: "{% static 'js/bootstrap-multiselect.js' %}"}
 
   -compress js
     %script{type: "text/javascript", src: "{% static 'js/graph_base_functions.js' %}"}
+    %script{type: "text/javascript", src: "{% static 'js/notify.js' %}"}
 
   -block javascript
+
+  {% register_notify_callbacks callbacks='fill_notification_list,fill_notification_badge' %}
