@@ -46,7 +46,7 @@ INSTALLED_APPS = (
     'authentification',
     'bootstrap3',
     'django_extensions',
-    #'debug_toolbar',
+    'debug_toolbar',
     'django_pdb',
     'crispy_forms',
     'oscar',  # hack: add self for templates dir
@@ -81,8 +81,8 @@ MIDDLEWARE = (
     'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'django_pdb.middleware.PdbMiddleware'#,
-   # 'debug_toolbar.middleware.DebugToolbarMiddleware',
+    'django_pdb.middleware.PdbMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
 )
 
 
