@@ -43,6 +43,7 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_crontab',
     'authentification',
     'bootstrap3',
     'django_extensions',
@@ -62,8 +63,10 @@ INSTALLED_APPS = (
     'end_test_poll',
     'forum',
     'notification',
-    'channels'
-
+    'channels',
+    'student_collaboration',
+    'widget_tweaks',
+    'notifications'
 ) + ADDITIONAL_APPS
 
 CHANNEL_LAYERS = {
@@ -141,6 +144,10 @@ LOGGING = {
             'handlers': ['console'],
             'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
         },
+        'django_crontab': {
+            'handlers': ['console'],
+            'level': 'INFO',
+        }
     },
 }
 
@@ -207,3 +214,9 @@ EMAIL_HOST_USER ="euredukaoscar.noreply@gmail.com"
 EMAIL_HOST_PASSWORD ="7A=em=nBt@+r3MFq"
 
 EMAIL_USE_TLS = True
+
+""" Cron tasks """
+CRONJOBS = [
+    ('* * * * *', 'django.core.management.call_command', ['close_pending_help_requests']),
+    ('* * * * *', 'django.core.management.call_command', ['set_help_requests_to_pending']),
+]

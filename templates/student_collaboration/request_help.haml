@@ -1,0 +1,58 @@
+-extends "student_collaboration/template.haml"
+-load static
+{% load widget_tweaks %}
+
+
+
+-block content-student
+  {% if skill_form.list|length <= 0%}
+    .transparent-frame.center-block.col-md-8
+      Vous n'avez pour l'instant aucune compétence nécessitant de l'aide
+  {% else %}
+    {% if skill_form.too_many_requests %}
+      .transparent-frame.center-block.col-md-8
+        Vous avez atteint le maximum de requêtes ouvertes simultanées
+    {% else %}
+      .transparent-frame.center-block.col-md-8
+        %label Vous pouvez demander de l'aide pour les compétences suivantes :
+
+        %form{method : "post"}
+          {% csrf_token %}
+          {% for field in skill_form.visible_fields %}
+            {% if field.errors %}
+              %ul
+                {% for error in field.errors %}
+                  %li
+                    {{ error }}
+                {% endfor %}
+            {% endif %}
+            %div.form-group
+              %div
+                {%render_field field class="form-control" %}
+          {% endfor %}
+          %button.btn.btn-primary#send_help_request{type : "submit"} Send help request
+    {% endif %}
+  {% endif %}
+
+  :javascript
+    $(document).ready( function() {
+      $('#unmastered-skill-select').multiselect({
+        buttonWidth: '600px',
+        buttonText: function(options, select) {
+                if (options.length === 0){
+                    txt = 'Pas de compétence(s) sélectionnée(s)...';
+                }
+                else if (options.length === 1) {
+                    txt = '1 compétence sélectionnée';
+                }
+                else if (options.length > 3){
+                    $('#send_help_request').attr("disabled", true);
+                    return 'Vous ne pouvez pas demander de l\'aide pour plus de 3 compétences à la fois';
+                }else{
+                    txt = options.length + ' compétences sélectionnées';
+                }
+                $('#send_help_request').attr("disabled", false);
+                return txt;
+            }
+      });
+    });
