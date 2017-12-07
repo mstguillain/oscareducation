@@ -61,11 +61,20 @@ INSTALLED_APPS = (
     'users',
     'resources',
     'end_test_poll',
-    'student_collaboration',
     'forum',
+    'notification',
+    'channels',
+    'student_collaboration',
     'widget_tweaks',
     'notifications'
 ) + ADDITIONAL_APPS
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "asgiref.inmemory.ChannelLayer",
+        "ROUTING": "notification.web_sockets.routing.channel_routing",
+    },
+}
 
 MIDDLEWARE = (
     'django.contrib.sessions.middleware.SessionMiddleware',
