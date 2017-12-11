@@ -8,7 +8,7 @@ $(document).ready(function(){
 
     function initPageAndSocket() {
 
-        $('[data-toggle="popover"]').popover();
+        $('#bellicon').popover();
 
         fetchNotifs()
 
