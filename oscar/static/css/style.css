@@ -1194,8 +1194,8 @@ input:checked + .slider:before {
 color : #FFFFFF;
 }
 
-.nav-item-active a:hover{
-color : #f57c00;
+.nav-item-active a:hover {
+    color: #f57c00;
 }
 
 .notif-list-item-footer p {
