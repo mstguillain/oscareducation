@@ -1,10 +1,11 @@
+# -*- coding: utf-8 -*-
 import os
 import traceback
 import collections
 import time
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support.ui import WebDriverWait, Select
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException, WebDriverException
 from selenium.webdriver.common.action_chains import ActionChains
@@ -17,10 +18,10 @@ ADMIN_PASSWORD = "root"
 
 TEACHER_PSEUDO = "TestTeacher"
 TEACHER_PASSWORD = "test"
-CLASS_NAME = "testClass015"
+CLASS_NAME = "testClass01"
 STUDENTS = (
-	("fnselen11", "lnselen015"),
-	("fnselen22", "lnselen015")
+	("first_name11", "last_name11_01"),
+	("first_name22", "last_name22_01")
 )
 
 STUDENTS_SKILLS = (
@@ -101,7 +102,7 @@ class Selenium:
 		for studentUserName, studentCode in studentCodes.iteritems():
 			self.__testFunction(self.logInStudent, studentUserName, STUDENTS_PASSWORD, studentCode)
 			self.logOutUser()
-		return studentCodes.keys()
+		return sorted(studentCodes.keys())
 
 	def testCollaborativeTool(self, studentsPseudo, students_collaborative_tools_params):
 		# With the first user we create a help request
@@ -111,8 +112,8 @@ class Selenium:
 		self.__testFunction(self.activateCollaborativeTool, studentParams[0], studentParams[1])
 		# The first to connect ask for help
 		askRequestText = self.__testFunction(self.askHelp, 1)
-		askRequestText += self.__testFunction(self.askHelp, 2)
-		askRequestText += self.__testFunction(self.askHelp, 4)
+		# askRequestText += self.__testFunction(self.askHelp, 2)
+		# askRequestText += self.__testFunction(self.askHelp, 4)
 		# askRequestText += self.__testFunction(self.askHelp, 3) # maximum 3 requests
 		print(askRequestText)
 
@@ -135,6 +136,27 @@ class Selenium:
 		# We step back to the collborative history and close the request
 		self.__testFunction(self.closeFirstHelpRequest)
 
+		askRequestText = self.__testFunction(self.askHelp, 3)
+
+		curIndex = 1
+		self.setDriverIndex(curIndex)
+		self.acceptHelpRequest()
+		self.__testFunction(self.sendForumMessage, "Second helprequest accepted")
+
+		curIndex = 0
+		self.setDriverIndex(curIndex)
+		askRequestText = self.__testFunction(self.askHelp, 2)
+		self.deactivateCollaborativeTool()
+
+		curIndex = 1
+		self.setDriverIndex(curIndex)
+		self.getCurrentDriver().get(BASE_URL+'student_collaboration/help_request_history/?Montrer+les+requêtes+clôturées=on&requests=None&showClosed=1&sort=timestamp')
+		# toggle = self.__waitElementByClassName("switch")
+		# toggle.click()
+
+
+	# stud01 asker
+	# stud02 helper
 
 	# Other class logic #
 
@@ -406,6 +428,25 @@ class Selenium:
 
 		distanceBox.submit()
 
+	def deactivateCollaborativeTool(self):
+		""" We assume that a student user is currently logged in """
+		self.getCurrentDriver().get(BASE_URL+"student_collaboration/settings/")
+		self.__testURL("student_collaboration/settings/", r"The collaborative tool can't be accessed", r"Are you sure that a user is logged in already and that it is a student ?")
+
+		# Disable the collaborative tool it is not already
+		collaborativeCheckBox = self.__waitElementById("collaborative_tool_check")
+		# isActivate = collaborativeCheckBox.is_selected()
+        #
+		# if isActivate:
+		toggle = self.__waitElementByClassName("switch")
+		toggle.click()
+		modalButton = self.__waitElementById("modal_button")
+		modalButton.click()
+		validateB = self.__waitElementById("submit_settings_button")
+		validateB.click()
+		# else:
+		# 	print "\tWarning : The collaborative tool was already deactivated. It's content have still been refreshed"
+
 	def askHelp(self, numberOfHelpElem):
 		""" Will automatically ask help for his first unmastered skill.
 		 We consider that the a student is logged in & have activated its collaborative tool & have at least one un mastered skill """
@@ -479,15 +520,23 @@ class Selenium:
 	def closeFirstHelpRequest(self):
 		""" Will close the first discussion on the currently logged in student
 			We consider that a student is logged in and that the first entry on his help request history table can close the conversation"""
-		self.getCurrentDriver().get(BASE_URL + "student_collaboration/help_request_history/")
+		driver = self.getCurrentDriver()
+		driver.get(BASE_URL + "student_collaboration/help_request_history/")
 		self.__testURL("student_collaboration/help_request_history/", r"The help request history page was not shown",
 		               r"Are you logged in as a student with the collaborative tool enable ?")
 
 		xPathHistoryTable = '//*[@id="history"]'
 		pastRawsNumber = self.__countRawsInTable(xPathHistoryTable)
 
-		xPathFirstCloseButton = '//*[@id="history"]/tbody[2]/tr/td[4]/form/input[1]'
+		# xPathFirstCloseButton = '//*[@id="history"]/tbody[2]/tr/td[4]/form/input[1]'
+		xPathFirstCloseButton = '//*[@id="history"]/tbody[2]/tr/td[4]/a'
 		self.__clickButtonByXPath(xPathFirstCloseButton)
+
+		options = self.__waitElementByName("closeReason")
+		select = Select(driver.find_element_by_name("closeReason"))
+		select.select_by_value("USER_CLOSED")
+		options.submit()
+
 
 		# We check that the entry dissapear of the history table
 		if pastRawsNumber != self.__countRawsInTable(xPathHistoryTable)+1:
